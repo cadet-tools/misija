@@ -166,7 +166,9 @@ async function init(){
     try{game=await M.unpack(gm[1]);localStorage.setItem('misija_game',JSON.stringify(game));}
     catch(e){alert('Starta saite ir bojāta. Izmantoju iepriekšējo misiju.');}
   }
-  if(!game){try{game=JSON.parse(localStorage.getItem('misija_game')||'null')}catch(e){}}
+  // Saglabāto misiju (no starta saites) izmantojam tikai, ja tajā jau ir sākta misija;
+  // citādi vienmēr jaunākais noklusējums no game.js
+  if(!game){try{const g=JSON.parse(localStorage.getItem('misija_game')||'null');if(g&&localStorage.getItem('misija_state_'+g.id))game=g}catch(e){}}
   if(!game)game=window.MISIJA_DEFAULT;
   st=load();
   $('gameTitle').textContent=game.title;
