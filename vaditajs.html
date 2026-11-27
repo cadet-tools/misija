@@ -132,6 +132,16 @@ video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio
         <div><label>Sods par nokavēto minūti (p.)</label><input id="gPen" type="number" min="0"></div>
         <div><label>Diskvalifikācija pēc kavējuma (min, 0 = nav)</label><input id="gDq" type="number" min="0"></div>
       </div>
+      <div class="grid3"><div><label>Bonuss par pilnu ziņojumu (p.)</label><input id="gBonus" type="number" min="0"></div></div>
+    </div>
+    <div class="card">
+      <h2>Stāsts: ienaidnieka plāna ziņas</h2>
+      <p class="mut small">Katru ziņu var atklāt vienā vai vairākos KP. Finišā jaunsargs redz izlūkošanas ziņojumu ar atrastajām ziņām, un neatrastās ir aizklātas. Īsais ID tiek izmantots KP tabulā kolonnā “Ziņas”.</p>
+      <div style="overflow:auto"><table id="factTable"></table></div>
+      <div class="bar"><button class="btn sec" id="addFact">+ Pievienot ziņu</button></div>
+      <label>Iznākums: visas ziņas noskaidrotas</label><textarea id="eFull"></textarea>
+      <label>Iznākums: noskaidrota vismaz puse</label><textarea id="ePart"></textarea>
+      <label>Iznākums: mazāk nekā puse</label><textarea id="eFail"></textarea>
     </div>
     <div class="card">
       <h2>Kontrolpunkti</h2>
@@ -160,7 +170,7 @@ video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio
 const $=id=>document.getElementById(id);
 let game=loadGame(), results=loadResults(), stopScan=null, lastScan='';
 
-function loadGame(){try{return JSON.parse(localStorage.getItem('misija_admin_game')||'null')||structuredClone(window.MISIJA_DEFAULT)}catch(e){return structuredClone(window.MISIJA_DEFAULT)}}
+function loadGame(){try{const g=JSON.parse(localStorage.getItem('misija_admin_game')||'null');if(g&&(g.v||1)>=window.MISIJA_DEFAULT.v)return g}catch(e){}return structuredClone(window.MISIJA_DEFAULT)}
 function saveGameLS(){localStorage.setItem('misija_admin_game',JSON.stringify(game))}
 function loadResults(){try{return JSON.parse(localStorage.getItem('misija_admin_results')||'[]')}catch(e){return[]}}
 function saveResults(){localStorage.setItem('misija_admin_results',JSON.stringify(results))}
@@ -196,11 +206,12 @@ function renderResults(){
   const rows=results.filter(r=>r.g===game.id).map(r=>({r,sc:M.score(game,r.s,r.f,r.v)}))
     .sort((a,b)=>(b.sc.total-a.sc.total)||(a.sc.usedMs-b.sc.usedMs));
   if(!rows.length){$('resTable').innerHTML='<tr><td class="mut">Vēl nav neviena rezultāta.</td></tr>';return}
-  $('resTable').innerHTML='<tr><th>#</th><th>Jaunsargs</th><th>Punkti</th><th>KP</th><th>Laiks</th><th>Sods</th><th>Pakāpe</th><th>Pārb.</th><th>Apmeklētie KP</th><th></th></tr>'+
+  $('resTable').innerHTML='<tr><th>#</th><th>Jaunsargs</th><th>Punkti</th><th>KP</th><th>Ziņojums</th><th>Laiks</th><th>Sods</th><th>Pakāpe</th><th>Pārb.</th><th>Apmeklētie KP</th><th></th></tr>'+
     rows.map(({r,sc},i)=>{
       const clockOff=Math.abs((r.scannedAt||r.f)-r.f)>15*60000||r.f<r.s;
       return `<tr><td>${i+1}</td><td><b>${M.esc(r.n)}</b><div class="mut small">${M.clock(r.s)}–${M.clock(r.f)}</div></td>
-      <td><b>${sc.total}</b>${sc.penalty?`<div class="mut small">${sc.raw}−${sc.penalty}</div>`:''}</td><td>${sc.count}</td><td>${M.fmt(sc.usedMs)}</td>
+      <td><b>${sc.total}</b>${sc.penalty||sc.bonus?`<div class="mut small">${sc.raw}${sc.bonus?'+'+sc.bonus:''}${sc.penalty?'−'+sc.penalty:''}</div>`:''}</td><td>${sc.count}</td>
+      <td>${sc.nFacts?`<span class="${sc.complete?'ok':''}">${sc.facts.size}/${sc.nFacts}</span>`:'—'}</td><td>${M.fmt(sc.usedMs)}</td>
       <td>${sc.dq?'<span class="bad">DQ</span>':sc.penalty?`−${sc.penalty} (${sc.overMin} min)`:'—'}</td>
       <td>${sc.dq?'—':M.rank(game,sc.total)}</td>
       <td>${r.valid?'<span class="ok">✓</span>':'<span class="bad">✕</span>'}${clockOff?' <span class="warn" title="Finiša laiks telefonā ļoti atšķiras no skenēšanas brīža">⏱</span>':''}</td>
@@ -226,9 +237,9 @@ $('pasteBtn').onclick=()=>{addResult($('pasteBox').value);$('pasteBox').value=''
 $('clearBtn').onclick=()=>{if(!confirm('Dzēst VISUS šīs misijas rezultātus? To nevar atsaukt.'))return;results=results.filter(r=>r.g!==game.id);saveResults();renderResults()};
 $('csvBtn').onclick=()=>{
   const ids=game.kp.map(k=>k.id);
-  const head=['Vieta','Jaunsargs','Punkti kopā','KP punkti','Sods','Kavējums min','DQ','KP skaits','Laiks','Starts','Finišs','Pārbaude',...ids.map(i=>'KP'+i)];
+  const head=['Vieta','Jaunsargs','Punkti kopā','KP punkti','Bonuss','Ziņojums','Sods','Kavējums min','DQ','KP skaits','Laiks','Starts','Finišs','Pārbaude',...ids.map(i=>'KP'+i)];
   const rows=results.filter(r=>r.g===game.id).map(r=>({r,sc:M.score(game,r.s,r.f,r.v)})).sort((a,b)=>(b.sc.total-a.sc.total)||(a.sc.usedMs-b.sc.usedMs))
-    .map(({r,sc},i)=>{const vm=Object.fromEntries(r.v);return [i+1,r.n,sc.total,sc.raw,sc.penalty,sc.overMin,sc.dq?'jā':'',sc.count,M.fmt(sc.usedMs),new Date(r.s).toLocaleString('lv-LV'),new Date(r.f).toLocaleString('lv-LV'),r.valid?'OK':'NEDERĪGS',...ids.map(id=>vm[id]!=null?M.fmt(vm[id]*1000):'')]});
+    .map(({r,sc},i)=>{const vm=Object.fromEntries(r.v);return [i+1,r.n,sc.total,sc.raw,sc.bonus,sc.nFacts?sc.facts.size+'/'+sc.nFacts:'',sc.penalty,sc.overMin,sc.dq?'jā':'',sc.count,M.fmt(sc.usedMs),new Date(r.s).toLocaleString('lv-LV'),new Date(r.f).toLocaleString('lv-LV'),r.valid?'OK':'NEDERĪGS',...ids.map(id=>vm[id]!=null?M.fmt(vm[id]*1000):'')]});
   const csv='﻿'+[head,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`${game.title.replace(/[^\p{L}\p{N}]+/gu,'_')}_rezultati.csv`;a.click();
 };
@@ -239,7 +250,7 @@ async function renderStart(){
   startUrl=base()+'#g='+await M.pack(game);
   $('startLink').textContent=startUrl;
   $('startQr').innerHTML=M.qrSvg(startUrl,'L');
-  $('startInfo').textContent=`${game.title} · ${game.kp.length} KP · ${M.maxPoints(game)} p. · ${game.min} min · saites garums ${startUrl.length} simboli`;
+  $('startInfo').textContent=`${game.title} · ${game.kp.length} KP · ${M.maxPoints(game)} p. · ${game.min} min · ${(game.facts||[]).length} ziņas · saites garums ${startUrl.length} simboli`;
 }
 $('copyStart').onclick=async()=>{try{await navigator.clipboard.writeText(startUrl);$('copyStart').textContent='✓ Nokopēts'}catch(e){prompt('Nokopē saiti:',startUrl)}setTimeout(()=>$('copyStart').textContent='Kopēt saiti',1500)};
 $('printStart').onclick=()=>{
@@ -259,23 +270,36 @@ $('printKp').onclick=()=>{
 
 /* ---------- IESTATĪJUMI ---------- */
 function renderGameForm(){
-  $('gTitle').value=game.title;$('gBrief').value=game.brief;$('gMin').value=game.min;$('gPen').value=game.pen;$('gDq').value=game.dq;
-  $('kpTable').innerHTML='<tr><th style="width:80px">KP</th><th style="width:80px">Punkti</th><th>Izlūkziņa (redz pēc skenēšanas)</th><th></th></tr>'+
-    game.kp.map((k,i)=>`<tr><td><input data-i="${i}" data-f="id" value="${M.esc(k.id)}"></td><td><input data-i="${i}" data-f="p" type="number" min="0" value="${k.p}"></td><td><textarea data-i="${i}" data-f="m">${M.esc(k.m)}</textarea></td><td><button class="btn sec" style="padding:6px 10px" onclick="delKp(${i})">✕</button></td></tr>`).join('');
+  game.facts=game.facts||[];game.end=game.end||{full:'',part:'',fail:''};
+  $('gTitle').value=game.title;$('gBrief').value=game.brief;$('gMin').value=game.min;$('gPen').value=game.pen;$('gDq').value=game.dq;$('gBonus').value=game.bonus||0;
+  $('eFull').value=game.end.full||'';$('ePart').value=game.end.part||'';$('eFail').value=game.end.fail||'';
+  $('factTable').innerHTML='<tr><th style="width:110px">ID</th><th style="width:130px">Nosaukums</th><th>Ziņas teksts ziņojumā</th><th>Atrodama KP</th><th></th></tr>'+
+    game.facts.map((f,i)=>`<tr><td><input data-fi="${i}" data-f="id" value="${M.esc(f.id)}"></td><td><input data-fi="${i}" data-f="t" value="${M.esc(f.t)}"></td><td><textarea data-fi="${i}" data-f="x">${M.esc(f.x)}</textarea></td><td class="small">${game.kp.filter(k=>(k.f||[]).includes(f.id)).map(k=>k.id).join(', ')||'<span class="bad">nekur!</span>'}</td><td><button class="btn sec" style="padding:6px 10px" onclick="delFact(${i})">✕</button></td></tr>`).join('');
+  $('kpTable').innerHTML='<tr><th style="width:80px">KP</th><th style="width:80px">Punkti</th><th>Izlūkziņa (redz pēc skenēšanas)</th><th style="width:150px">Ziņas (ID, ar komatu)</th><th></th></tr>'+
+    game.kp.map((k,i)=>`<tr><td><input data-i="${i}" data-f="id" value="${M.esc(k.id)}"></td><td><input data-i="${i}" data-f="p" type="number" min="0" value="${k.p}"></td><td><textarea data-i="${i}" data-f="m">${M.esc(k.m)}</textarea></td><td><input data-i="${i}" data-f="f" value="${M.esc((k.f||[]).join(', '))}" placeholder="piem. laiks"></td><td><button class="btn sec" style="padding:6px 10px" onclick="delKp(${i})">✕</button></td></tr>`).join('');
 }
 function readGameForm(){
   game.title=$('gTitle').value.trim()||'Misija';game.brief=$('gBrief').value.trim();
   game.min=Math.max(1,+$('gMin').value||60);game.pen=Math.max(0,+$('gPen').value||0);game.dq=Math.max(0,+$('gDq').value||0);
-  document.querySelectorAll('#kpTable [data-i]').forEach(el=>{const k=game.kp[+el.dataset.i];const f=el.dataset.f;k[f]=f==='p'?Math.max(0,+el.value||0):el.value.trim()});
+  game.bonus=Math.max(0,+$('gBonus').value||0);
+  game.end={full:$('eFull').value.trim(),part:$('ePart').value.trim(),fail:$('eFail').value.trim()};
+  document.querySelectorAll('#factTable [data-fi]').forEach(el=>{game.facts[+el.dataset.fi][el.dataset.f]=el.value.trim()});
+  game.facts=game.facts.filter(f=>f.id);
+  document.querySelectorAll('#kpTable [data-i]').forEach(el=>{const k=game.kp[+el.dataset.i];const f=el.dataset.f;
+    k[f]=f==='p'?Math.max(0,+el.value||0):f==='f'?el.value.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):el.value.trim()});
   game.kp=game.kp.filter(k=>k.id);
 }
 window.delKp=i=>{readGameForm();game.kp.splice(i,1);renderGameForm()};
+window.delFact=i=>{readGameForm();game.facts.splice(i,1);renderGameForm()};
+$('addFact').onclick=()=>{readGameForm();game.facts.push({id:'zina'+(game.facts.length+1),t:'',x:''});renderGameForm()};
 $('addKp').onclick=()=>{readGameForm();game.kp.push({id:'',p:1,m:''});renderGameForm()};
 $('saveGame').onclick=()=>{
   readGameForm();
   const ids=game.kp.map(k=>k.id);
   if(new Set(ids).size!==ids.length){$('saveMsg').className='small bad';$('saveMsg').textContent='KP numuri atkārtojas. Izlabo.';return}
   if(ids.some(id=>!/^[0-9A-Za-z]+$/.test(id))){$('saveMsg').className='small bad';$('saveMsg').textContent='KP numurā drīkst būt tikai cipari un burti.';return}
+  const fids=new Set(game.facts.map(f=>f.id));const badF=game.kp.flatMap(k=>(k.f||[]).filter(f=>!fids.has(f)).map(f=>`KP ${k.id}: “${f}”`));
+  if(badF.length){$('saveMsg').className='small bad';$('saveMsg').textContent='Nezināms ziņas ID: '+badF.join(', ');renderGameForm();return}
   saveGameLS();renderGameForm();renderResults();$('saveMsg').className='small ok';$('saveMsg').textContent='✓ Saglabāts. Neaizmirsti izsūtīt jaunu starta saiti.';
 };
 $('newKey').onclick=()=>{

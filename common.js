@@ -84,13 +84,31 @@
     const pts = Object.fromEntries(game.kp.map(k => [k.id, k.p]));
     const seen = new Set(); let raw = 0;
     for (const [id] of visits) if (!seen.has(id) && pts[id] != null) { seen.add(id); raw += pts[id]; }
+    const facts = M.foundFacts(game, visits);
+    const nFacts = (game.facts || []).length;
+    const complete = nFacts > 0 && facts.size === nFacts;
+    const bonus = complete ? (game.bonus || 0) : 0;
     const usedMs = Math.max(0, (finish || Date.now()) - start);
     const overMin = Math.max(0, Math.ceil(usedMs / 60000 - game.min - 1e-9));
     const penalty = overMin * game.pen;
     const dq = game.dq > 0 && overMin > game.dq;
-    return { raw, penalty, total: dq ? 0 : Math.max(0, raw - penalty), overMin, dq, count: seen.size, usedMs };
+    return { raw, penalty, bonus, facts, nFacts, complete, total: dq ? 0 : Math.max(0, raw + bonus - penalty), overMin, dq, count: seen.size, usedMs };
   };
-  M.maxPoints = game => game.kp.reduce((a, k) => a + k.p, 0);
+  M.foundFacts = (game, visits) => {
+    const byId = Object.fromEntries(game.kp.map(k => [k.id, k]));
+    const out = new Set();
+    for (const [id] of visits) for (const f of (byId[id]?.f || [])) out.add(f);
+    return new Set((game.facts || []).map(f => f.id).filter(id => out.has(id)));
+  };
+  M.maxPoints = game => game.kp.reduce((a, k) => a + k.p, 0) + ((game.facts || []).length ? (game.bonus || 0) : 0);
+  // Iznākums pēc noskaidroto ziņu skaita
+  M.outcome = (game, sc) => {
+    if (!sc.nFacts) return null;
+    const r = sc.facts.size / sc.nFacts;
+    if (sc.complete) return { k: 'full', t: 'OPERĀCIJA IZDEVUSIES', x: game.end?.full || '' };
+    if (r >= 0.5) return { k: 'part', t: 'DAĻĒJI IZDEVUSIES', x: game.end?.part || '' };
+    return { k: 'fail', t: 'NEIZDEVĀS', x: game.end?.fail || '' };
+  };
 
   M.rank = (game, total) => {
     const r = total / Math.max(1, M.maxPoints(game));

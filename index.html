@@ -48,6 +48,18 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
 .qr svg{display:block;width:100%;height:auto}
 .rank{font:900 28px system-ui;color:var(--acc);text-align:center}
 .small{font-size:13px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{padding:6px 10px;border-radius:999px;font:800 13px system-ui;background:#1d2620;color:#6f7f73;border:1px dashed #3a4a3e}
+.chip.on{background:#1f3a26;color:var(--good);border:1px solid var(--good)}
+.rep{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:#e9e3cf;color:#1d1a12;border-radius:10px;padding:14px;line-height:1.5}
+.rep .h{text-align:center;font-weight:900;letter-spacing:2px;border-bottom:2px solid #1d1a12;padding-bottom:6px;margin-bottom:8px}
+.rep .l{margin:7px 0}.rep .l b{display:inline-block;min-width:78px}
+.rep .x{background:#1d1a12;color:#1d1a12;border-radius:3px;padding:0 4px;user-select:none}
+.rep .stamp{display:inline-block;margin-top:8px;border:3px solid;border-radius:6px;padding:4px 10px;font-weight:900;letter-spacing:1px;transform:rotate(-3deg)}
+.rep .stamp.full{color:#1a7a32}.rep .stamp.part{color:#a26b00}.rep .stamp.fail{color:#b3261e}
+.newfact{background:#1f3a26;border:1px solid var(--good);border-radius:10px;padding:8px 10px;margin-top:8px;text-align:left}
+.newfact b{color:var(--good)}
+.tag{display:inline-block;font:800 11px system-ui;padding:2px 6px;border-radius:6px;background:#2b3a2f;color:var(--good);margin-left:4px}
 </style>
 </head>
 <body>
@@ -84,6 +96,11 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
       <button class="btn scanbtn" id="scanBtn">📷 SKENĒT KP</button>
       <button class="btn sec" id="manualBtn">⌨ Ievadīt kodu ar roku</button>
     </div>
+    <div class="card" id="factCard">
+      <h2>Izlūkošanas ziņojums: <span id="factN">0</span>/<span id="factT">0</span></h2>
+      <div class="chips" id="factChips"></div>
+      <p class="mut small" id="factHint" style="margin:8px 0 0"></p>
+    </div>
     <div class="card">
       <h2>Savāktās izlūkziņas</h2>
       <div id="intelList" class="mut">Vēl nav neviena. Dodies pie pirmā KP!</div>
@@ -99,6 +116,9 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
       <div class="rank" id="dRank"></div>
       <div style="font:900 54px/1.1 system-ui" id="dTotal"></div>
       <div class="mut" id="dDetail"></div>
+    </div>
+    <div class="card" id="dRepCard">
+      <div class="rep" id="dRep"></div>
     </div>
     <div class="card" style="text-align:center">
       <h2>Parādi šo kodu vadītājam</h2>
@@ -141,6 +161,7 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
     <div class="big" id="resBig"></div>
     <h2 id="resTitle"></h2>
     <div class="intel hidden" id="resIntel" style="text-align:left"></div>
+    <div id="resFacts"></div>
     <div style="height:10px"></div>
     <button class="btn" id="resOk">Turpināt misiju</button>
   </div>
@@ -185,20 +206,22 @@ function render(){
     $('vBrief').classList.remove('hidden');
     $('briefTitle').textContent=game.title;
     $('briefText').textContent=game.brief;
-    $('briefRules').textContent=`Laiks: ${game.min} min · kontrolpunkti: ${game.kp.length} · kopā iespējami ${M.maxPoints(game)} punkti · sods: −${game.pen} p. par katru nokavēto minūti`+(game.dq>0?` · kavējot vairāk nekā ${game.dq} min, rezultāts netiek ieskaitīts.`:'.');
+    $('briefRules').textContent=`Laiks: ${game.min} min · kontrolpunkti: ${game.kp.length} · kopā iespējami ${M.maxPoints(game)} punkti · sods: −${game.pen} p. par katru nokavēto minūti`+(game.dq>0?` · kavējot vairāk nekā ${game.dq} min, rezultāts netiek ieskaitīts`:'')+((game.facts||[]).length&&game.bonus?` · par pilnu izlūkošanas ziņojumu (${game.facts.length}/${game.facts.length} ziņas) +${game.bonus} p. bonuss.`:'.');
     if(st&&st.name)$('name').value=st.name;
   }else if(!st.finish){
     $('vRun').classList.remove('hidden');
     $('whoami').textContent=st.name+' · starts '+M.clock(st.start);
     $('sMax').textContent=M.maxPoints(game);
     renderIntel($('intelList'));
+    renderFacts();
     tickTimer(); timerInt=setInterval(tickTimer,1000);
   }else{
     $('vDone').classList.remove('hidden');
     const sc=M.score(game,st.start,st.finish,st.visits);
     $('dRank').textContent=sc.dq?'Diskvalificēts':M.rank(game,sc.total);
     $('dTotal').textContent=sc.total+' p.';
-    $('dDetail').textContent=`${sc.count} KP · ${sc.raw} p.`+(sc.penalty?` − ${sc.penalty} p. sods (kavējums ${sc.overMin} min)`:'')+` · laiks ${M.fmt(sc.usedMs)}`;
+    $('dDetail').textContent=`${sc.count} KP · ${sc.raw} p.`+(sc.bonus?` + ${sc.bonus} p. bonuss`:'')+(sc.penalty?` − ${sc.penalty} p. sods (kavējums ${sc.overMin} min)`:'')+` · laiks ${M.fmt(sc.usedMs)}`;
+    renderReport(sc);
     $('resultQr').innerHTML=M.qrSvg(M.encodeResult(game,st),'L');
     $('dWho').textContent=st.name+' · finišs '+M.clock(st.finish);
     renderIntel($('dIntel'));
@@ -209,7 +232,29 @@ function renderIntel(el){
   const byId=Object.fromEntries(game.kp.map(k=>[k.id,k]));
   if(!st.visits.length){el.innerHTML='<span class="mut">Vēl nav neviena. Dodies pie pirmā KP!</span>';return}
   el.innerHTML=[...st.visits].reverse().map(([id,t])=>{const k=byId[id]||{p:0,m:''};
-    return `<div class="intel"><b>KP ${M.esc(id)} · +${k.p} p.</b> <span class="mut small">${M.clock(st.start+t*1000)}</span><div>${M.esc(k.m)}</div></div>`}).join('');
+    return `<div class="intel"><b>KP ${M.esc(id)} · +${k.p} p.</b>${(k.f||[]).map(f=>`<span class="tag">${M.esc(factName(f))}</span>`).join('')} <span class="mut small">${M.clock(st.start+t*1000)}</span><div>${M.esc(k.m)}</div></div>`}).join('');
+}
+const factName=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
+
+function renderFacts(){
+  const facts=game.facts||[];
+  $('factCard').classList.toggle('hidden',!facts.length);
+  if(!facts.length)return;
+  const found=M.foundFacts(game,st.visits);
+  $('factN').textContent=found.size; $('factT').textContent=facts.length;
+  $('factChips').innerHTML=facts.map(f=>`<span class="chip${found.has(f.id)?' on':''}">${found.has(f.id)?'✓ ':''}${M.esc(f.t)}</span>`).join('');
+  $('factHint').textContent=found.size===facts.length?(game.bonus?`Ziņojums pilns! +${game.bonus} p. bonuss. Tagad krāj punktus un neaizkavējies.`:'Ziņojums pilns!'):'Meklē trūkstošās ziņas. Dažādi KP atklāj dažādas ziņas.';
+}
+
+function renderReport(sc){
+  const facts=game.facts||[];
+  $('dRepCard').classList.toggle('hidden',!facts.length);
+  if(!facts.length)return;
+  const oc=M.outcome(game,sc);
+  $('dRep').innerHTML=`<div class="h">IZLŪKOŠANAS ZIŅOJUMS</div>
+    <div class="small">Operācija: ${M.esc(game.title)}<br>Ziņotājs: ${M.esc(st.name)}<br>Noskaidrots: ${sc.facts.size} no ${facts.length}</div>`+
+    facts.map(f=>`<div class="l"><b>${M.esc(f.t)}:</b> ${sc.facts.has(f.id)?M.esc(f.x):'<span class="x">'+'█'.repeat(18)+'</span> <i>nav noskaidrots</i>'}</div>`).join('')+
+    (oc?`<div style="text-align:center"><span class="stamp ${oc.k}">${oc.t}</span></div><p style="margin:10px 0 0">${M.esc(oc.x)}</p>`:'');
 }
 
 function tickTimer(){
@@ -235,12 +280,20 @@ function handleKp(id,code){
   const k=game.kp.find(x=>x.id===String(id));
   if(!k||M.kpCode(game.key,k.id)!==String(code).toUpperCase()){M.buzz([60,60,60]);showRes('err','✕','Nederīgs kods','Šis kods nepieder šai misijai. Pārbaudi KP numuru un kodu.');return}
   if(st.visits.some(v=>v[0]===k.id)){M.buzz(120);showRes('dup','✓',`KP ${k.id} jau ieskaitīts`,'Šo punktu tu jau esi apmeklējis.',k);return}
+  const before=M.foundFacts(game,st.visits);
   st.visits.push([k.id,Math.round((Date.now()-st.start)/1000)]); save(); M.buzz([100,50,200]);
+  const after=M.foundFacts(game,st.visits);
+  const fresh=(game.facts||[]).filter(f=>after.has(f.id)&&!before.has(f.id));
+  const known=(k.f||[]).filter(id=>before.has(id));
   showRes('ok','+'+k.p,`KP ${k.id} apstiprināts!`,'',k);
+  $('resFacts').innerHTML=fresh.map(f=>`<div class="newfact"><b>JAUNA ZIŅA · ${M.esc(f.t)}</b><div>${M.esc(f.x)}</div></div>`).join('')+
+    (known.length&&!fresh.length?`<p class="mut small">Šī ziņa (${known.map(factName).map(M.esc).join(', ')}) jau bija zināma. Punkti tik un tā ieskaitīti.</p>`:'')+
+    ((game.facts||[]).length?`<p class="mut small">Ziņojums: ${after.size}/${game.facts.length}</p>`:'');
   render();
 }
 
 function showRes(kind,big,title,text,k){
+  $('resFacts').innerHTML='';
   $('resCard').className='card res '+kind;
   $('resHead').textContent=kind==='ok'?'Izlūkziņa saņemta':kind==='dup'?'Jau apmeklēts':'Kļūda';
   $('resBig').textContent=big; $('resTitle').textContent=title;
