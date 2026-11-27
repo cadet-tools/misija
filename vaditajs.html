@@ -45,6 +45,13 @@ video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio
 .splitbar i{display:block;height:100%;background:var(--good)}
 .rt tr.slow .splitbar i{background:var(--warn)}
 .tag{display:inline-block;font:800 11px system-ui;padding:2px 6px;border-radius:6px;background:#2b3a2f;color:var(--good)}
+.grp{border:1px solid #6b5418;background:#1f1a0c;border-radius:12px;padding:10px 12px;margin:8px 0}
+.grp.hi{border-color:#a3402f;background:#24110e}
+.grp .who{font-weight:800}.grp .meta{font-size:13px;color:var(--mut)}
+.grp table{margin-top:6px}.grp td,.grp th{padding:4px 8px;font-size:13px;white-space:nowrap}
+.badge{display:inline-block;font:800 11px system-ui;padding:2px 7px;border-radius:999px;background:#5a4612;color:#ffd76a;margin-left:6px;cursor:help}
+.badge.hi{background:#6a2a20;color:#ffb3a6}
+.with{font-size:12px;color:#ffd76a}
 .code{font-family:ui-monospace,monospace;word-break:break-all;font-size:12px;background:#0e140f;padding:8px;border-radius:8px;border:1px solid var(--line)}
 /* Drukas lapa */
 #printArea{display:none}
@@ -90,6 +97,11 @@ video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio
         <textarea id="pasteBox" placeholder="MR1.…"></textarea>
         <div class="bar"><button class="btn sec" id="pasteBtn">Pievienot</button></div>
       </details>
+    </div>
+    <div class="card hidden" id="groupCard">
+      <h2>👥 Iespējamais grupu darbs</h2>
+      <p class="mut small" style="margin-top:-4px">Jaunsargi, kas bijuši vienos un tajos pašos KP ar ne vairāk kā <input id="gwWin" type="number" min="1" max="30" style="width:56px;padding:4px 6px"> min starpību, vismaz <input id="gwMin" type="number" min="2" max="20" style="width:56px;padding:4px 6px"> KP. Tā nav pierādījums: kopā var sanākt arī nejauši, piemēram, uzreiz pēc starta vai pie populāra KP. Apskati detaļas.</p>
+      <div id="groupList"></div>
     </div>
     <div class="card">
       <h2>Rezultātu tabula · <span id="resGame"></span></h2>
@@ -219,11 +231,14 @@ function renderResults(){
   $('resGame').textContent=game.title;
   const rows=results.filter(r=>r.g===game.id).map(r=>({r,sc:M.score(game,r.s,r.f,r.v)}))
     .sort((a,b)=>(b.sc.total-a.sc.total)||(a.sc.usedMs-b.sc.usedMs));
+  renderGroups(rows.map(x=>x.r));
   if(!rows.length){$('resTable').innerHTML='<tr><td class="mut">Vēl nav neviena rezultāta.</td></tr>';return}
   $('resTable').innerHTML='<tr><th>#</th><th>Jaunsargs</th><th>Punkti</th><th>KP</th><th>Ziņojums</th><th>Laiks</th><th>Sods</th><th>Pakāpe</th><th>Pārb.</th><th>Laiki</th><th></th></tr>'+
     rows.map(({r,sc},i)=>{
       const clockOff=Math.abs((r.scannedAt||r.f)-r.f)>15*60000||r.f<r.s;
-      return `<tr><td>${i+1}</td><td><b>${M.esc(r.n)}</b><div class="mut small">${M.clock(r.s)}–${M.clock(r.f)}</div></td>
+      const pts=partnersOf(r), hi=pts.some(x=>x.p.hi);
+      const badge=pts.length?`<span class="badge${hi?' hi':''}" title="Kopā ar: ${M.esc(pts.map(x=>x.o.n+' ('+x.p.shared.length+' KP)').join(', '))}">👥 ${pts.length}</span>`:'';
+      return `<tr><td>${i+1}</td><td><b>${M.esc(r.n)}</b>${badge}${pts.length?`<div class="with">kopā ar: ${pts.map(x=>M.esc(x.o.n)).join(', ')}</div>`:''}<div class="mut small">${M.clock(r.s)}–${M.clock(r.f)}</div></td>
       <td><b>${sc.total}</b>${sc.penalty||sc.bonus?`<div class="mut small">${sc.raw}${sc.bonus?'+'+sc.bonus:''}${sc.penalty?'−'+sc.penalty:''}</div>`:''}</td><td>${sc.count}</td>
       <td>${sc.nFacts?`<span class="${sc.complete?'ok':''}">${sc.facts.size}/${sc.nFacts}</span>`:'—'}</td><td>${M.fmt(sc.usedMs)}</td>
       <td>${sc.dq?'<span class="bad">DQ</span>':sc.penalty?`−${sc.penalty} (${sc.overMin} min)`:'—'}</td>
@@ -234,7 +249,54 @@ function renderResults(){
       (openRoutes.has(rk(r))?`<tr class="routeRow"><td></td><td colspan="10">${routeHtml(r)}</td></tr>`:'')}).join('');
 }
 const rk=r=>r.g+'|'+r.n+'|'+r.s;
+
+/* ---------- GRUPU DARBA PĀRBAUDE ---------- */
+const gw={win:+(localStorage.getItem('misija_gw_win')||3),min:+(localStorage.getItem('misija_gw_min')||3)};
+function together(list){
+  const W=gw.win*60000, pairs=[];
+  const abs=r=>[...r.v].sort((a,b)=>a[1]-b[1]).map(([id,t],i)=>({id,at:r.s+t*1000,i}));
+  const A=list.map(r=>({r,v:abs(r)}));
+  for(let i=0;i<A.length;i++)for(let j=i+1;j<A.length;j++){
+    const shared=[];
+    for(const a of A[i].v){const b=A[j].v.find(x=>x.id===a.id&&Math.abs(x.at-a.at)<=W);if(b)shared.push({id:a.id,ta:a.at,tb:b.at,ia:a.i,ib:b.i})}
+    if(shared.length<gw.min)continue;
+    // garākā sērija pēc kārtas abos maršrutos
+    shared.sort((x,y)=>x.ta-y.ta);let run=1,best=1;
+    for(let k=1;k<shared.length;k++){if(shared[k].ia===shared[k-1].ia+1&&shared[k].ib===shared[k-1].ib+1){run++;best=Math.max(best,run)}else run=1}
+    const share=shared.length/Math.max(1,Math.min(A[i].v.length,A[j].v.length));
+    pairs.push({a:A[i].r,b:A[j].r,shared,run:best,share,hi:share>=0.6||best>=4});
+  }
+  return pairs.sort((x,y)=>(y.shared.length-x.shared.length)||(y.run-x.run));
+}
+function groupsOf(pairs){
+  // apvieno pārus grupās (A~B, B~C → A,B,C)
+  const par=new Map(),f=k=>{while(par.get(k)!==k){par.set(k,par.get(par.get(k)));k=par.get(k)}return k};
+  for(const p of pairs){for(const r of [p.a,p.b])if(!par.has(rk(r)))par.set(rk(r),rk(r));par.set(f(rk(p.a)),f(rk(p.b)))}
+  const g=new Map();for(const k of par.keys()){const root=f(k);if(!g.has(root))g.set(root,[]);g.get(root).push(k)}
+  return [...g.values()];
+}
+let gwPairs=[];
+function renderGroups(list){
+  gwPairs=together(list);
+  $('gwWin').value=gw.win;$('gwMin').value=gw.min;
+  $('groupCard').classList.toggle('hidden',!gwPairs.length);
+  if(!gwPairs.length){$('groupList').innerHTML='';return}
+  const name=k=>list.find(r=>rk(r)===k)?.n||k;
+  const groups=groupsOf(gwPairs);
+  $('groupList').innerHTML=groups.filter(g=>g.length>2).map(g=>`<div class="meta" style="margin:4px 0 8px">Iespējama grupa no ${g.length}: <b style="color:#ffd76a">${g.map(k=>M.esc(name(k))).join(', ')}</b></div>`).join('')+
+  gwPairs.map(p=>`<div class="grp${p.hi?' hi':''}">
+    <div class="who">${p.hi?'⚠ ':''}${M.esc(p.a.n)} ↔ ${M.esc(p.b.n)}</div>
+    <div class="meta">Kopā ${p.shared.length} KP (${Math.round(p.share*100)}% no maršruta)${p.run>1?` · ${p.run} pēc kārtas`:''}</div>
+    <details><summary class="meta">Detaļas</summary><table><tr><th>KP</th><th>${M.esc(p.a.n)}</th><th>${M.esc(p.b.n)}</th><th>Starpība</th></tr>
+    ${p.shared.map(x=>`<tr><td><b>${M.esc(x.id)}</b></td><td>${M.clock(x.ta)}</td><td>${M.clock(x.tb)}</td><td>${M.fmt(Math.abs(x.ta-x.tb))}</td></tr>`).join('')}</table></details></div>`).join('');
+}
+function partnersOf(r){return gwPairs.filter(p=>p.a===r||p.b===r).map(p=>({o:p.a===r?p.b:p.a,p}))}
+$('gwWin').onchange=$('gwMin').onchange=()=>{gw.win=Math.max(1,+$('gwWin').value||3);gw.min=Math.max(2,+$('gwMin').value||3);localStorage.setItem('misija_gw_win',gw.win);localStorage.setItem('misija_gw_min',gw.min);renderResults()};
 const openRoutes=new Set();
+function withAt(r,id){
+  const v=r.v.find(x=>x[0]===id);if(!v)return'';const at=r.s+v[1]*1000,W=gw.win*60000;
+  return results.filter(o=>o!==r&&o.g===r.g).map(o=>{const x=o.v.find(y=>y[0]===id);return x&&Math.abs(o.s+x[1]*1000-at)<=W?`👥 ${M.esc(o.n)}`:''}).filter(Boolean).join(', ');
+}
 function routeHtml(r){
   const byId=Object.fromEntries(game.kp.map(k=>[k.id,k]));
   const fname=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
@@ -247,15 +309,16 @@ function routeHtml(r){
   const longest=legs.reduce((a,l)=>l.split>a.split?l:a,legs[0]);
   let cum=0;
   return `<div class="route"><table class="rt">
-    <tr><th>Nr.</th><th>KP</th><th>Punkti</th><th>Ziņa</th><th>Pulkstenis</th><th>No starta</th><th>Posms</th><th style="width:30%"></th></tr>
-    <tr class="mut"><td>—</td><td><b>STARTS</b></td><td></td><td></td><td>${M.clock(r.s)}</td><td>00:00</td><td></td><td></td></tr>`+
+    <tr><th>Nr.</th><th>KP</th><th>Punkti</th><th>Ziņa</th><th>Pulkstenis</th><th>No starta</th><th>Posms</th><th>Tajā pašā laikā</th><th style="width:25%"></th></tr>
+    <tr class="mut"><td>—</td><td><b>STARTS</b></td><td></td><td></td><td>${M.clock(r.s)}</td><td>00:00</td><td></td><td></td><td></td></tr>`+
     legs.map((l,i)=>{const k=byId[l.id];if(!l.fin&&k)cum+=k.p;
       return `<tr${l===longest?' class="slow"':''}><td>${l.fin?'🏁':i+1}</td><td><b>${M.esc(l.id)}</b>${l.fin?'':l.mth==='g'?' <span title="Atzīmēts ar GPS">📡</span>':' <span title="Noskenēts QR">▦</span>'}</td>
       <td>${l.fin?`<span class="mut">kopā ${cum}</span>`:k?`+${k.p} <span class="mut small">(${cum})</span>`:'?'}</td>
       <td>${!l.fin&&k?(k.f||[]).map(f=>`<span class="tag">${M.esc(fname(f))}</span>`).join(' '):''}</td>
       <td>${M.clock(r.s+l.t*1000)}</td><td>${M.fmt(l.t*1000)}</td><td><b>${M.fmt(l.split*1000)}</b></td>
+      <td class="with">${l.fin?'':withAt(r,l.id)}</td>
       <td><div class="splitbar"><i style="width:${Math.max(2,l.split/maxSplit*100)}%"></i></div></td></tr>`}).join('')+
-    `</table><p class="mut small" style="margin:6px 0 0">📡 = atzīmēts ar GPS, ▦ = QR kods. Posms = laiks no iepriekšējā KP. Garākais posms iekrāsots dzeltens.</p></div>`;
+    `</table><p class="mut small" style="margin:6px 0 0">📡 = atzīmēts ar GPS, ▦ = QR kods. Posms = laiks no iepriekšējā KP. Garākais posms iekrāsots dzeltens. “Tajā pašā laikā” = citi jaunsargi šajā KP ±${gw.win} min robežās.</p></div>`;
 }
 $('resTable').addEventListener('click',e=>{const rb=e.target.closest('.route');if(rb){const k=rb.dataset.k;openRoutes.has(k)?openRoutes.delete(k):openRoutes.add(k);renderResults();return}const b=e.target.closest('.delres');if(!b)return;const id=b.dataset.id;if(!confirm('Dzēst šo rezultātu?'))return;results=results.filter(x=>x.g+'|'+x.n+'|'+x.s!==id);saveResults();renderResults()});
 
@@ -276,9 +339,9 @@ $('pasteBtn').onclick=()=>{addResult($('pasteBox').value);$('pasteBox').value=''
 $('clearBtn').onclick=()=>{if(!confirm('Dzēst VISUS šīs misijas rezultātus? To nevar atsaukt.'))return;results=results.filter(r=>r.g!==game.id);saveResults();renderResults()};
 $('csvBtn').onclick=()=>{
   const ids=game.kp.map(k=>k.id);
-  const head=['Vieta','Jaunsargs','Punkti kopā','KP punkti','Bonuss','Ziņojums','Sods','Kavējums min','DQ','KP skaits','Laiks','Starts','Finišs','Pārbaude',...ids.map(i=>'KP'+i)];
+  const head=['Vieta','Jaunsargs','Kopā ar (grupu darbs?)','Punkti kopā','KP punkti','Bonuss','Ziņojums','Sods','Kavējums min','DQ','KP skaits','Laiks','Starts','Finišs','Pārbaude',...ids.map(i=>'KP'+i)];
   const rows=results.filter(r=>r.g===game.id).map(r=>({r,sc:M.score(game,r.s,r.f,r.v)})).sort((a,b)=>(b.sc.total-a.sc.total)||(a.sc.usedMs-b.sc.usedMs))
-    .map(({r,sc},i)=>{const vm=Object.fromEntries(r.v);return [i+1,r.n,sc.total,sc.raw,sc.bonus,sc.nFacts?sc.facts.size+'/'+sc.nFacts:'',sc.penalty,sc.overMin,sc.dq?'jā':'',sc.count,M.fmt(sc.usedMs),new Date(r.s).toLocaleString('lv-LV'),new Date(r.f).toLocaleString('lv-LV'),r.valid?'OK':'NEDERĪGS',...ids.map(id=>vm[id]!=null?M.fmt(vm[id]*1000):'')]});
+    .map(({r,sc},i)=>{const vm=Object.fromEntries(r.v);return [i+1,r.n,partnersOf(r).map(x=>`${x.o.n} (${x.p.shared.length} KP)`).join(', '),sc.total,sc.raw,sc.bonus,sc.nFacts?sc.facts.size+'/'+sc.nFacts:'',sc.penalty,sc.overMin,sc.dq?'jā':'',sc.count,M.fmt(sc.usedMs),new Date(r.s).toLocaleString('lv-LV'),new Date(r.f).toLocaleString('lv-LV'),r.valid?'OK':'NEDERĪGS',...ids.map(id=>vm[id]!=null?M.fmt(vm[id]*1000):'')]});
   const csv='﻿'+[head,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`${game.title.replace(/[^\p{L}\p{N}]+/gu,'_')}_rezultati.csv`;a.click();
 };
