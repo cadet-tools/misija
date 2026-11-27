@@ -48,6 +48,14 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
 .qr svg{display:block;width:100%;height:auto}
 .rank{font:900 28px system-ui;color:var(--acc);text-align:center}
 .small{font-size:13px}
+#mapOv{position:fixed;inset:0;z-index:40;background:#0c100d;display:flex;flex-direction:column}
+#mapVp{position:relative;flex:1;overflow:hidden;background:#dfe6d8}
+.mapbar{display:flex;gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:#0c100d}
+.mapbar .t{flex:1;font-weight:800;font-size:15px}
+.maptools{position:absolute;right:10px;bottom:calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;z-index:2}
+.maptools button{width:52px;height:52px;border-radius:14px;border:0;background:rgba(12,16,13,.9);color:#fff;font:800 22px system-ui;box-shadow:0 4px 14px #0006}
+.maplegend{position:absolute;left:10px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:2;background:rgba(12,16,13,.88);color:#fff;border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.6}
+.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .chip{padding:6px 10px;border-radius:999px;font:800 13px system-ui;background:#1d2620;color:#6f7f73;border:1px dashed #3a4a3e}
 .chip.on{background:#1f3a26;color:var(--good);border:1px solid var(--good)}
@@ -77,6 +85,8 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
       <label for="name">Vārds, uzvārds vai komandas nosaukums</label>
       <input id="name" maxlength="40" autocomplete="off" placeholder="piem. Jānis B. / 2. vads">
       <div style="height:12px"></div>
+      <button class="btn sec" id="mapBtn1">🗺 Apskatīt karti un plānot maršrutu</button>
+      <div style="height:10px"></div>
       <button class="btn" id="startBtn">▶ SĀKT MISIJU</button>
       <p class="mut small" id="offlineNote">Rīks darbojas bez interneta. Neaizver un nedzēs pārlūka datus līdz finišam.</p>
     </div>
@@ -94,6 +104,7 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
         <div class="stat"><b id="sMax">0</b><span>max</span></div>
       </div>
       <button class="btn scanbtn" id="scanBtn">📷 SKENĒT KP</button>
+      <button class="btn sec" id="mapBtn2" style="margin-bottom:10px;font-size:19px;padding:18px">🗺 KARTE</button>
       <button class="btn sec" id="manualBtn">⌨ Ievadīt kodu ar roku</button>
     </div>
     <div class="card" id="factCard">
@@ -131,6 +142,20 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
     </div>
     <button class="btn sec" id="newBtn">Sākt jaunu misiju šajā telefonā</button>
   </section>
+</div>
+
+<!-- Karte -->
+<div id="mapOv" class="hidden">
+  <div class="mapbar"><div class="t" id="mapTitle">Karte</div><span class="mut small" id="gpsInfo"></span><button class="btn sec" style="width:auto;padding:10px 14px" id="mapClose">✕ Aizvērt</button></div>
+  <div id="mapVp">
+    <div class="maptools">
+      <button id="mzIn" aria-label="Tuvināt">+</button>
+      <button id="mzOut" aria-label="Attālināt">−</button>
+      <button id="mzFit" aria-label="Visa misija" style="font-size:18px">⤢</button>
+      <button id="mzGps" class="hidden" aria-label="Kur es esmu" style="font-size:20px">📍</button>
+    </div>
+    <div class="maplegend"><span class="dot" style="background:#fff;border:2px solid #c51fc5"></span>jāapmeklē · <span class="dot" style="background:#5fd07a;border:2px solid #0d5c22"></span>apmeklēts<br><span style="color:#e07ae0">△</span> starts/finišs · <span id="mapCount"></span></div>
+  </div>
 </div>
 
 <!-- Skeneris -->
@@ -171,6 +196,7 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
 <script src="qrcode.js"></script>
 <script src="common.js"></script>
 <script src="game.js"></script>
+<script src="map.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 let game=null, st=null, stopScan=null, timerInt=null, busyScan=false;
@@ -324,6 +350,28 @@ $('scanClose').onclick=closeScan;
 $('manualBtn').onclick=()=>{$('mKp').value='';$('mCode').value='';$('manOv').classList.remove('hidden');$('mKp').focus()};
 $('mCancel').onclick=()=>$('manOv').classList.add('hidden');
 $('mOk').onclick=()=>{const id=$('mKp').value.trim(),c=$('mCode').value.trim();if(!id||c.length!==4){alert('Ievadi KP numuru un 4 simbolu kodu.');return}$('manOv').classList.add('hidden');handleKp(id,c)};
+
+let mapView=null, mapGameId=null;
+function openMap(){
+  if(!game.map){alert('Šai misijai nav pievienota karte.');return}
+  $('mapOv').classList.remove('hidden');
+  $('mapTitle').textContent=game.title+' · karte';
+  if(!mapView||mapGameId!==game.id){
+    const tools=$('mapVp').querySelector('.maptools'),leg=$('mapVp').querySelector('.maplegend');
+    mapView=MisijaMap($('mapVp'),game);mapGameId=game.id;
+    $('mapVp').append(tools,leg);}
+  const vis=new Set((st&&st.visits||[]).map(v=>v[0]));
+  mapView.setVisited(vis);
+  $('mapCount').textContent=`${vis.size}/${game.kp.length} KP`;
+  $('mzGps').classList.toggle('hidden',!mapView.hasGps);
+  $('gpsInfo').textContent='';
+  if(mapView.hasGps)mapView.startGps(t=>$('gpsInfo').textContent='📍 '+t);
+  requestAnimationFrame(()=>mapView.fit());
+}
+$('mapBtn1').onclick=openMap; $('mapBtn2').onclick=openMap;
+$('mapClose').onclick=()=>{$('mapOv').classList.add('hidden');if(mapView)mapView.stopGps()};
+$('mzIn').onclick=()=>mapView.zoom(1.5); $('mzOut').onclick=()=>mapView.zoom(1/1.5); $('mzFit').onclick=()=>mapView.fit();
+$('mzGps').onclick=()=>{if(!mapView.centerGps())$('gpsInfo').textContent='📍 gaidu GPS signālu…'};
 
 $('finishBtn').onclick=()=>{
   if(!confirm('Vai tiešām esi štābā? Pēc finiša vairs nevarēsi skenēt KP.'))return;

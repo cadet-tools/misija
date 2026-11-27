@@ -140,6 +140,8 @@ video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio
         <div><label>Diskvalifikācija pēc kavējuma (min, 0 = nav)</label><input id="gDq" type="number" min="0"></div>
       </div>
       <div class="grid3"><div><label>Bonuss par pilnu ziņojumu (p.)</label><input id="gBonus" type="number" min="0"></div></div>
+      <label style="display:flex;gap:8px;align-items:center;margin-top:12px;color:#fff;font-size:15px"><input id="gGps" type="checkbox" style="width:auto"> Rādīt jaunsargam viņa atrašanās vietu kartē (GPS)</label>
+      <p class="mut small" style="margin:4px 0 0">Izslēgts: jaunsargi orientējas pēc kartes paši. Ieslēgts: vieglāk, piemērots iesācējiem.</p>
     </div>
     <div class="card">
       <h2>Stāsts: ienaidnieka plāna ziņas</h2>
@@ -152,6 +154,7 @@ video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio
     </div>
     <div class="card">
       <h2>Kontrolpunkti</h2>
+      <p class="mut small">“Kartē X/Y” ir KP vieta LOF kartes attēlā pikseļos (2481×1754). Ja tukšs, KP kartē netiek rādīts.</p>
       <div style="overflow:auto"><table id="kpTable"></table></div>
       <div class="bar"><button class="btn sec" id="addKp">+ Pievienot KP</button></div>
     </div>
@@ -303,22 +306,22 @@ $('printKp').onclick=()=>{
 /* ---------- IESTATĪJUMI ---------- */
 function renderGameForm(){
   game.facts=game.facts||[];game.end=game.end||{full:'',part:'',fail:''};
-  $('gTitle').value=game.title;$('gBrief').value=game.brief;$('gMin').value=game.min;$('gPen').value=game.pen;$('gDq').value=game.dq;$('gBonus').value=game.bonus||0;
+  $('gTitle').value=game.title;$('gBrief').value=game.brief;$('gMin').value=game.min;$('gPen').value=game.pen;$('gDq').value=game.dq;$('gBonus').value=game.bonus||0;$('gGps').checked=!!game.gps;
   $('eFull').value=game.end.full||'';$('ePart').value=game.end.part||'';$('eFail').value=game.end.fail||'';
   $('factTable').innerHTML='<tr><th style="width:110px">ID</th><th style="width:130px">Nosaukums</th><th>Ziņas teksts ziņojumā</th><th>Atrodama KP</th><th></th></tr>'+
     game.facts.map((f,i)=>`<tr><td><input data-fi="${i}" data-f="id" value="${M.esc(f.id)}"></td><td><input data-fi="${i}" data-f="t" value="${M.esc(f.t)}"></td><td><textarea data-fi="${i}" data-f="x">${M.esc(f.x)}</textarea></td><td class="small">${game.kp.filter(k=>(k.f||[]).includes(f.id)).map(k=>k.id).join(', ')||'<span class="bad">nekur!</span>'}</td><td><button class="btn sec" style="padding:6px 10px" onclick="delFact(${i})">✕</button></td></tr>`).join('');
-  $('kpTable').innerHTML='<tr><th style="width:80px">KP</th><th style="width:80px">Punkti</th><th>Izlūkziņa (redz pēc skenēšanas)</th><th style="width:150px">Ziņas (ID, ar komatu)</th><th></th></tr>'+
-    game.kp.map((k,i)=>`<tr><td><input data-i="${i}" data-f="id" value="${M.esc(k.id)}"></td><td><input data-i="${i}" data-f="p" type="number" min="0" value="${k.p}"></td><td><textarea data-i="${i}" data-f="m">${M.esc(k.m)}</textarea></td><td><input data-i="${i}" data-f="f" value="${M.esc((k.f||[]).join(', '))}" placeholder="piem. laiks"></td><td><button class="btn sec" style="padding:6px 10px" onclick="delKp(${i})">✕</button></td></tr>`).join('');
+  $('kpTable').innerHTML='<tr><th style="width:80px">KP</th><th style="width:80px">Punkti</th><th>Izlūkziņa (redz pēc skenēšanas)</th><th style="width:150px">Ziņas (ID, ar komatu)</th><th style="width:80px">Kartē X</th><th style="width:80px">Kartē Y</th><th></th></tr>'+
+    game.kp.map((k,i)=>`<tr><td><input data-i="${i}" data-f="id" value="${M.esc(k.id)}"></td><td><input data-i="${i}" data-f="p" type="number" min="0" value="${k.p}"></td><td><textarea data-i="${i}" data-f="m">${M.esc(k.m)}</textarea></td><td><input data-i="${i}" data-f="f" value="${M.esc((k.f||[]).join(', '))}" placeholder="piem. laiks"></td><td><input data-i="${i}" data-f="x" type="number" value="${k.x??''}"></td><td><input data-i="${i}" data-f="y" type="number" value="${k.y??''}"></td><td><button class="btn sec" style="padding:6px 10px" onclick="delKp(${i})">✕</button></td></tr>`).join('');
 }
 function readGameForm(){
   game.title=$('gTitle').value.trim()||'Misija';game.brief=$('gBrief').value.trim();
   game.min=Math.max(1,+$('gMin').value||60);game.pen=Math.max(0,+$('gPen').value||0);game.dq=Math.max(0,+$('gDq').value||0);
-  game.bonus=Math.max(0,+$('gBonus').value||0);
+  game.bonus=Math.max(0,+$('gBonus').value||0);game.gps=$('gGps').checked;
   game.end={full:$('eFull').value.trim(),part:$('ePart').value.trim(),fail:$('eFail').value.trim()};
   document.querySelectorAll('#factTable [data-fi]').forEach(el=>{game.facts[+el.dataset.fi][el.dataset.f]=el.value.trim()});
   game.facts=game.facts.filter(f=>f.id);
   document.querySelectorAll('#kpTable [data-i]').forEach(el=>{const k=game.kp[+el.dataset.i];const f=el.dataset.f;
-    k[f]=f==='p'?Math.max(0,+el.value||0):f==='f'?el.value.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):el.value.trim()});
+    k[f]=f==='p'?Math.max(0,+el.value||0):(f==='x'||f==='y')?(el.value===''?null:+el.value):f==='f'?el.value.split(/[,\s]+/).map(x=>x.trim()).filter(Boolean):el.value.trim()});
   game.kp=game.kp.filter(k=>k.id);
 }
 window.delKp=i=>{readGameForm();game.kp.splice(i,1);renderGameForm()};
