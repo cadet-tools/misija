@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="lv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0c100d">
+<title>Misija · vadītājs · CADET.LV</title>
+<link rel="manifest" href="site.webmanifest">
+<link rel="icon" href="favicon-32.png">
+<style>
+:root{--bg:#0c100d;--card:#141b16;--line:#2b382e;--txt:#eef3ee;--mut:#9aab9e;--good:#5fd07a;--warn:#f0c04a;--bad:#ff6b6b;--acc:#c8a96a}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{padding:calc(12px + env(safe-area-inset-top)) 14px 30px}
+.wrap{max-width:980px;margin:0 auto}
+header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+header img{height:26px}header .t{font-weight:800;flex:1}
+nav{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+nav button{flex:1;min-width:120px;padding:12px;border-radius:12px;border:1px solid var(--line);background:#141b16;color:#fff;font:700 15px system-ui;cursor:pointer}
+nav button.on{background:var(--good);color:#07120a;border-color:var(--good)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-bottom:12px}
+h2{margin:0 0 10px;font-size:18px}
+label{display:block;font-size:13px;color:var(--mut);margin:8px 0 4px}
+input,textarea{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e140f;color:#fff;font:15px system-ui}
+textarea{min-height:90px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.btn{border:0;border-radius:12px;padding:12px 16px;font:800 15px system-ui;color:#07120a;background:var(--good);cursor:pointer}
+.btn.sec{background:#26332a;color:#fff}.btn.warn{background:var(--acc);color:#1a1307}.btn.bad{background:#6a2a2b;color:#fff}
+.bar{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left;vertical-align:top}
+th{color:var(--mut);font-weight:600;font-size:12px;text-transform:uppercase}
+td input,td textarea{padding:6px 8px;font-size:14px}
+td textarea{min-height:38px}
+.mut{color:var(--mut)}.small{font-size:13px}
+.ok{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+.hidden{display:none!important}
+.qrbox{background:#fff;border-radius:12px;padding:8px;width:240px}
+.qrbox svg{display:block;width:100%;height:auto}
+video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio:4/3;object-fit:cover}
+.code{font-family:ui-monospace,monospace;word-break:break-all;font-size:12px;background:#0e140f;padding:8px;border-radius:8px;border:1px solid var(--line)}
+/* Drukas lapa */
+#printArea{display:none}
+@media print{
+  @page{size:A4;margin:10mm}
+  body{background:#fff;color:#000;padding:0}
+  .wrap{display:none}
+  #printArea{display:block}
+  .sheet{display:grid;grid-template-columns:1fr 1fr;gap:6mm;page-break-after:always}
+  .sheet:last-child{page-break-after:auto}
+  .pcard{border:1.5mm solid #000;border-radius:4mm;height:88mm;padding:3mm;display:flex;flex-direction:column;align-items:center;justify-content:space-between;text-align:center;font-family:Arial,sans-serif;break-inside:avoid}
+  .pcard .kp{font:900 30pt Arial;line-height:1}
+  .pcard .pts{font:700 12pt Arial}
+  .pcard .pq{width:58mm;height:58mm}
+  .pcard .pq svg{width:100%;height:100%}
+  .pcard .cd{font:700 13pt monospace;letter-spacing:2px}
+  .pcard .ft{font:9pt Arial;color:#333}
+  .pstart{text-align:center;font-family:Arial,sans-serif;padding-top:10mm}
+  .pstart .pq{width:120mm;height:120mm;margin:8mm auto}
+  .pstart .pq svg{width:100%;height:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><img src="CADET_LV_LOGO.png" alt="CADET.LV"><div class="t">Misijas vadītāja panelis</div><a class="mut small" href="index.html">jaunsarga skats →</a></header>
+  <nav>
+    <button data-tab="tRes" class="on">📋 Rezultāti</button>
+    <button data-tab="tStart">▶ Starta saite</button>
+    <button data-tab="tPrint">🖨 KP drukāšana</button>
+    <button data-tab="tGame">⚙ Misijas iestatījumi</button>
+  </nav>
+
+  <!-- REZULTĀTI -->
+  <section id="tRes">
+    <div class="card">
+      <h2>Skenēt jaunsarga rezultātu</h2>
+      <p class="mut small">Finišā jaunsargs parāda QR kodu savā telefonā. Noskenē to šeit. Darbojas bez interneta.</p>
+      <div class="bar"><button class="btn" id="scanBtn">📷 Sākt skenēšanu</button><button class="btn sec hidden" id="scanStop">Apturēt</button></div>
+      <div id="scanBox" class="hidden" style="margin-top:10px"><video id="video" playsinline muted></video></div>
+      <p id="scanMsg" class="small"></p>
+      <details><summary class="mut small">Ielīmēt rezultāta kodu ar roku</summary>
+        <textarea id="pasteBox" placeholder="MR1.…"></textarea>
+        <div class="bar"><button class="btn sec" id="pasteBtn">Pievienot</button></div>
+      </details>
+    </div>
+    <div class="card">
+      <h2>Rezultātu tabula · <span id="resGame"></span></h2>
+      <div style="overflow:auto"><table id="resTable"></table></div>
+      <div class="bar"><button class="btn sec" id="csvBtn">⬇ Lejupielādēt CSV</button><button class="btn bad" id="clearBtn">Dzēst visus rezultātus</button></div>
+      <p class="mut small">Pārbaude: <span class="ok">✓</span> kods nav mainīts · <span class="bad">✕</span> kods neatbilst šai misijai vai ir labots · <span class="warn">⏱</span> telefona finiša laiks ļoti atšķiras no skenēšanas brīža (iespējams, mainīts pulkstenis vai finišs nospiests vēlāk/agrāk).</p>
+    </div>
+  </section>
+
+  <!-- STARTS -->
+  <section id="tStart" class="hidden">
+    <div class="card">
+      <h2>Starta saite jaunsargiem</h2>
+      <p class="mut small">Jaunsargi atver šo saiti <b>kamēr ir internets</b> (piem. pie starta, tavā tīklājā). Rīks saglabājas telefonā un tālāk darbojas bez interneta. Saitē ir misijas iestatījumi, tāpēc pēc iestatījumu maiņas jāizsūta jauna saite.</p>
+      <div class="bar" style="align-items:flex-start">
+        <div class="qrbox" id="startQr"></div>
+        <div style="flex:1;min-width:240px">
+          <div class="code" id="startLink"></div>
+          <div class="bar"><button class="btn" id="copyStart">Kopēt saiti</button><button class="btn sec" id="printStart">🖨 Drukāt starta QR</button></div>
+          <p class="mut small" id="startInfo"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- DRUKĀT -->
+  <section id="tPrint" class="hidden">
+    <div class="card">
+      <h2>KP QR kodi drukāšanai</h2>
+      <p class="mut small">6 kartītes uz A4 lapas. Zem katra QR ir 4 simbolu kods, ko var ievadīt ar roku, ja kamera nedarbojas. Ieteicams laminēt vai ielikt failā lietus dēļ. <b>Svarīgi:</b> ja nomaini misijas atslēgu, visi KP jādrukā no jauna.</p>
+      <div class="bar"><button class="btn" id="printKp">🖨 Drukāt visus KP</button></div>
+    </div>
+    <div class="card">
+      <h2>KP saraksts</h2>
+      <div style="overflow:auto"><table id="kpCodes"></table></div>
+    </div>
+  </section>
+
+  <!-- IESTATĪJUMI -->
+  <section id="tGame" class="hidden">
+    <div class="card">
+      <h2>Misija</h2>
+      <label>Nosaukums</label><input id="gTitle">
+      <label>Leģenda / instruktāža</label><textarea id="gBrief"></textarea>
+      <div class="grid3">
+        <div><label>Laika limits (min)</label><input id="gMin" type="number" min="1"></div>
+        <div><label>Sods par nokavēto minūti (p.)</label><input id="gPen" type="number" min="0"></div>
+        <div><label>Diskvalifikācija pēc kavējuma (min, 0 = nav)</label><input id="gDq" type="number" min="0"></div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Kontrolpunkti</h2>
+      <div style="overflow:auto"><table id="kpTable"></table></div>
+      <div class="bar"><button class="btn sec" id="addKp">+ Pievienot KP</button></div>
+    </div>
+    <div class="card">
+      <div class="bar">
+        <button class="btn" id="saveGame">💾 Saglabāt</button>
+        <button class="btn warn" id="newKey">🔑 Jauna misija (jauna atslēga)</button>
+        <button class="btn bad" id="resetGame">Atjaunot noklusējumu (Vējiņu kauss)</button>
+      </div>
+      <p class="mut small">“Jauna misija” izveido jaunu atslēgu: vecie izdrukātie KP un vecās starta saites vairs neder. Izmanto, ja gribi, lai jaunsargi nevarētu izmantot iepriekšējās reizes QR bildes.</p>
+      <p class="small" id="saveMsg"></p>
+    </div>
+  </section>
+</div>
+
+<div id="printArea"></div>
+
+<script src="jsqr.js"></script>
+<script src="qrcode.js"></script>
+<script src="common.js"></script>
+<script src="game.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let game=loadGame(), results=loadResults(), stopScan=null, lastScan='';
+
+function loadGame(){try{return JSON.parse(localStorage.getItem('misija_admin_game')||'null')||structuredClone(window.MISIJA_DEFAULT)}catch(e){return structuredClone(window.MISIJA_DEFAULT)}}
+function saveGameLS(){localStorage.setItem('misija_admin_game',JSON.stringify(game))}
+function loadResults(){try{return JSON.parse(localStorage.getItem('misija_admin_results')||'[]')}catch(e){return[]}}
+function saveResults(){localStorage.setItem('misija_admin_results',JSON.stringify(results))}
+const base=()=>new URL('index.html',location.href).toString().split('#')[0];
+const kpUrl=k=>base()+'#k='+k.id+'-'+M.kpCode(game.key,k.id);
+
+// Cilnes
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('on',x===b));
+  ['tRes','tStart','tPrint','tGame'].forEach(t=>$(t).classList.toggle('hidden',t!==b.dataset.tab));
+  if(b.dataset.tab!=='tRes')stopScanner();
+  if(b.dataset.tab==='tStart')renderStart();
+  if(b.dataset.tab==='tPrint')renderKpCodes();
+  if(b.dataset.tab==='tGame')renderGameForm();
+});
+
+/* ---------- REZULTĀTI ---------- */
+function addResult(text){
+  let r;
+  try{r=M.decodeResult(text,game)}catch(e){msg('bad','✕ '+e.message);return}
+  if(r.g!==game.id){msg('bad',`✕ Šis rezultāts ir no citas misijas (${r.g}). Atver pareizos misijas iestatījumus.`);return}
+  r.scannedAt=Date.now();
+  const id=r.g+'|'+r.n+'|'+r.s;
+  const i=results.findIndex(x=>x.g+'|'+x.n+'|'+x.s===id);
+  if(i>=0){results[i]={...r,scannedAt:results[i].scannedAt};msg('warn',`↻ ${r.n}: rezultāts jau bija tabulā (atjaunots).`)}
+  else{results.push(r);const sc=M.score(game,r.s,r.f,r.v);msg(r.valid?'ok':'bad',(r.valid?'✓ ':'✕ PĀRBAUDE NEIZDEVĀS · ')+`${r.n}: ${sc.total} punkti (${sc.count} KP)`)}
+  M.buzz(120);saveResults();renderResults();
+}
+function msg(cls,t){$('scanMsg').className='small '+cls;$('scanMsg').textContent=t}
+
+function renderResults(){
+  $('resGame').textContent=game.title;
+  const rows=results.filter(r=>r.g===game.id).map(r=>({r,sc:M.score(game,r.s,r.f,r.v)}))
+    .sort((a,b)=>(b.sc.total-a.sc.total)||(a.sc.usedMs-b.sc.usedMs));
+  if(!rows.length){$('resTable').innerHTML='<tr><td class="mut">Vēl nav neviena rezultāta.</td></tr>';return}
+  $('resTable').innerHTML='<tr><th>#</th><th>Jaunsargs</th><th>Punkti</th><th>KP</th><th>Laiks</th><th>Sods</th><th>Pakāpe</th><th>Pārb.</th><th>Apmeklētie KP</th><th></th></tr>'+
+    rows.map(({r,sc},i)=>{
+      const clockOff=Math.abs((r.scannedAt||r.f)-r.f)>15*60000||r.f<r.s;
+      return `<tr><td>${i+1}</td><td><b>${M.esc(r.n)}</b><div class="mut small">${M.clock(r.s)}–${M.clock(r.f)}</div></td>
+      <td><b>${sc.total}</b>${sc.penalty?`<div class="mut small">${sc.raw}−${sc.penalty}</div>`:''}</td><td>${sc.count}</td><td>${M.fmt(sc.usedMs)}</td>
+      <td>${sc.dq?'<span class="bad">DQ</span>':sc.penalty?`−${sc.penalty} (${sc.overMin} min)`:'—'}</td>
+      <td>${sc.dq?'—':M.rank(game,sc.total)}</td>
+      <td>${r.valid?'<span class="ok">✓</span>':'<span class="bad">✕</span>'}${clockOff?' <span class="warn" title="Finiša laiks telefonā ļoti atšķiras no skenēšanas brīža">⏱</span>':''}</td>
+      <td class="small">${r.v.map(([id,t])=>`${M.esc(id)}<span class="mut">@${M.fmt(t*1000)}</span>`).join(', ')}</td>
+      <td><button class="btn sec delres" style="padding:6px 10px" data-id="${M.esc(r.g+'|'+r.n+'|'+r.s)}">✕</button></td></tr>`}).join('');
+}
+$('resTable').addEventListener('click',e=>{const b=e.target.closest('.delres');if(!b)return;const id=b.dataset.id;if(!confirm('Dzēst šo rezultātu?'))return;results=results.filter(x=>x.g+'|'+x.n+'|'+x.s!==id);saveResults();renderResults()});
+
+$('scanBtn').onclick=async()=>{
+  $('scanBox').classList.remove('hidden');$('scanStop').classList.remove('hidden');$('scanBtn').classList.add('hidden');
+  msg('','Notēmē kameru uz jaunsarga rezultāta QR kodu…');
+  try{
+    stopScan=await M.startScanner($('video'),text=>{
+      if(text===lastScan)return; lastScan=text; setTimeout(()=>{if(lastScan===text)lastScan=''},4000);
+      if(M.parseKp(text)){msg('warn','Tas ir KP kods, nevis rezultāts.');return}
+      addResult(text);
+    });
+  }catch(e){msg('bad','Kamera nav pieejama: '+(e.message||e.name));stopScanner()}
+};
+function stopScanner(){if(stopScan){stopScan();stopScan=null}$('scanBox').classList.add('hidden');$('scanStop').classList.add('hidden');$('scanBtn').classList.remove('hidden')}
+$('scanStop').onclick=stopScanner;
+$('pasteBtn').onclick=()=>{addResult($('pasteBox').value);$('pasteBox').value=''};
+$('clearBtn').onclick=()=>{if(!confirm('Dzēst VISUS šīs misijas rezultātus? To nevar atsaukt.'))return;results=results.filter(r=>r.g!==game.id);saveResults();renderResults()};
+$('csvBtn').onclick=()=>{
+  const ids=game.kp.map(k=>k.id);
+  const head=['Vieta','Jaunsargs','Punkti kopā','KP punkti','Sods','Kavējums min','DQ','KP skaits','Laiks','Starts','Finišs','Pārbaude',...ids.map(i=>'KP'+i)];
+  const rows=results.filter(r=>r.g===game.id).map(r=>({r,sc:M.score(game,r.s,r.f,r.v)})).sort((a,b)=>(b.sc.total-a.sc.total)||(a.sc.usedMs-b.sc.usedMs))
+    .map(({r,sc},i)=>{const vm=Object.fromEntries(r.v);return [i+1,r.n,sc.total,sc.raw,sc.penalty,sc.overMin,sc.dq?'jā':'',sc.count,M.fmt(sc.usedMs),new Date(r.s).toLocaleString('lv-LV'),new Date(r.f).toLocaleString('lv-LV'),r.valid?'OK':'NEDERĪGS',...ids.map(id=>vm[id]!=null?M.fmt(vm[id]*1000):'')]});
+  const csv='﻿'+[head,...rows].map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(';')).join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=`${game.title.replace(/[^\p{L}\p{N}]+/gu,'_')}_rezultati.csv`;a.click();
+};
+
+/* ---------- STARTS ---------- */
+let startUrl='';
+async function renderStart(){
+  startUrl=base()+'#g='+await M.pack(game);
+  $('startLink').textContent=startUrl;
+  $('startQr').innerHTML=M.qrSvg(startUrl,'L');
+  $('startInfo').textContent=`${game.title} · ${game.kp.length} KP · ${M.maxPoints(game)} p. · ${game.min} min · saites garums ${startUrl.length} simboli`;
+}
+$('copyStart').onclick=async()=>{try{await navigator.clipboard.writeText(startUrl);$('copyStart').textContent='✓ Nokopēts'}catch(e){prompt('Nokopē saiti:',startUrl)}setTimeout(()=>$('copyStart').textContent='Kopēt saiti',1500)};
+$('printStart').onclick=()=>{
+  $('printArea').innerHTML=`<div class="pstart"><div style="font:900 28pt Arial">${M.esc(game.title)}</div><div style="font:14pt Arial">Noskenē un atver, KAMĒR IR INTERNETS</div><div class="pq">${M.qrSvg(startUrl,'L')}</div><div style="font:12pt Arial">${game.min} min · ${game.kp.length} kontrolpunkti · CADET.LV</div></div>`;
+  window.print();
+};
+
+/* ---------- DRUKĀT ---------- */
+function renderKpCodes(){
+  $('kpCodes').innerHTML='<tr><th>KP</th><th>Punkti</th><th>Rokas kods</th><th>QR saite</th></tr>'+game.kp.map(k=>`<tr><td><b>${M.esc(k.id)}</b></td><td>${k.p}</td><td><b style="font-family:monospace;font-size:16px">${M.kpCode(game.key,k.id)}</b></td><td class="small mut" style="word-break:break-all">${M.esc(kpUrl(k))}</td></tr>`).join('');
+}
+$('printKp').onclick=()=>{
+  const cards=game.kp.map(k=>`<div class="pcard"><div class="kp">KP ${M.esc(k.id)}</div><div class="pts">${k.p} ${k.p===1?'punkts':'punkti'}</div><div class="pq">${M.qrSvg(kpUrl(k),'M')}</div><div class="cd">Kods: ${M.kpCode(game.key,k.id)}</div><div class="ft">${M.esc(game.title)} · CADET.LV</div></div>`);
+  let html='';for(let i=0;i<cards.length;i+=6)html+=`<div class="sheet">${cards.slice(i,i+6).join('')}</div>`;
+  $('printArea').innerHTML=html; window.print();
+};
+
+/* ---------- IESTATĪJUMI ---------- */
+function renderGameForm(){
+  $('gTitle').value=game.title;$('gBrief').value=game.brief;$('gMin').value=game.min;$('gPen').value=game.pen;$('gDq').value=game.dq;
+  $('kpTable').innerHTML='<tr><th style="width:80px">KP</th><th style="width:80px">Punkti</th><th>Izlūkziņa (redz pēc skenēšanas)</th><th></th></tr>'+
+    game.kp.map((k,i)=>`<tr><td><input data-i="${i}" data-f="id" value="${M.esc(k.id)}"></td><td><input data-i="${i}" data-f="p" type="number" min="0" value="${k.p}"></td><td><textarea data-i="${i}" data-f="m">${M.esc(k.m)}</textarea></td><td><button class="btn sec" style="padding:6px 10px" onclick="delKp(${i})">✕</button></td></tr>`).join('');
+}
+function readGameForm(){
+  game.title=$('gTitle').value.trim()||'Misija';game.brief=$('gBrief').value.trim();
+  game.min=Math.max(1,+$('gMin').value||60);game.pen=Math.max(0,+$('gPen').value||0);game.dq=Math.max(0,+$('gDq').value||0);
+  document.querySelectorAll('#kpTable [data-i]').forEach(el=>{const k=game.kp[+el.dataset.i];const f=el.dataset.f;k[f]=f==='p'?Math.max(0,+el.value||0):el.value.trim()});
+  game.kp=game.kp.filter(k=>k.id);
+}
+window.delKp=i=>{readGameForm();game.kp.splice(i,1);renderGameForm()};
+$('addKp').onclick=()=>{readGameForm();game.kp.push({id:'',p:1,m:''});renderGameForm()};
+$('saveGame').onclick=()=>{
+  readGameForm();
+  const ids=game.kp.map(k=>k.id);
+  if(new Set(ids).size!==ids.length){$('saveMsg').className='small bad';$('saveMsg').textContent='KP numuri atkārtojas. Izlabo.';return}
+  if(ids.some(id=>!/^[0-9A-Za-z]+$/.test(id))){$('saveMsg').className='small bad';$('saveMsg').textContent='KP numurā drīkst būt tikai cipari un burti.';return}
+  saveGameLS();renderGameForm();renderResults();$('saveMsg').className='small ok';$('saveMsg').textContent='✓ Saglabāts. Neaizmirsti izsūtīt jaunu starta saiti.';
+};
+$('newKey').onclick=()=>{
+  if(!confirm('Izveidot jaunu misiju ar jaunu atslēgu? Vecie KP izdrukas un starta saites vairs nederēs. Rezultāti no vecās misijas paliek, bet tabulā netiek rādīti.'))return;
+  readGameForm();game.key=M.newKey();game.id='m-'+M.newKey().slice(0,8);saveGameLS();renderGameForm();renderResults();
+  $('saveMsg').className='small ok';$('saveMsg').textContent='✓ Jauna misija izveidota. Izdrukā KP no jauna un izsūti jaunu starta saiti.';
+};
+$('resetGame').onclick=()=>{if(!confirm('Atjaunot noklusējuma Vējiņu kausa misiju? Tavas izmaiņas tiks zaudētas.'))return;game=structuredClone(window.MISIJA_DEFAULT);saveGameLS();renderGameForm();renderResults()};
+
+renderResults();
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>

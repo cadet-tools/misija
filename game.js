@@ -1,0 +1,45 @@
+// Noklusējuma misija: Vējiņu kausa 2026 LOF kartes 30 kontrolpunkti.
+// Punkti pēc rogaininga tradīcijas: KP numura pirmais cipars (31 → 3 punkti, 92 → 9 punkti).
+// Vadītāja lapā (vaditajs.html) visu var mainīt un izveidot jaunu starta saiti.
+window.MISIJA_DEFAULT = {
+  v: 1,
+  id: 'op-vejs',
+  key: 'vejs-2026-cadet',
+  title: 'Operācija VĒJŠ',
+  brief: 'Piekrastē darbojas ienaidnieka izlūkgrupa. Mūsu novērotāji kontrolpunktos atstājuši šifrētas izlūkziņas. Jūsu uzdevums: savākt pēc iespējas vairāk izlūkziņu un atgriezties štābā pirms laika beigām. Tālākie un grūtākie punkti dod vairāk punktu. Par katru nokavēto minūti zaudējat punktus.',
+  min: 60,
+  pen: 1,
+  dq: 30,
+  kp: [
+    ['21', 'Pie Vecdaugavas manīti svešinieki ar rācijām. Turpiniet novērošanu.'],
+    ['23', 'Piekrastē atrastas svaigas pēdas, kas ved uz ziemeļiem.'],
+    ['31', 'Ienaidnieks lieto signālu “trīs īsi, viens garš”. Pierakstiet to.'],
+    ['32', 'Pie ostas redzēta laiva bez numura. Ziņot štābam.'],
+    ['33', 'Mežā atrasts pamests novērošanas posteņa maskējums.'],
+    ['35', 'Sakaru līnija pārrauta. Rezerves frekvence: 146,5 MHz.'],
+    ['41', 'Novērotājs ziņo: patruļa maina sardzi ik pēc 40 minūtēm.'],
+    ['42', 'Kāpās noslēpta kaste ar kartēm. Kartes ir novecojušas, vērtīgas.'],
+    ['43', 'Ienaidnieka kurjers izmanto taku gar jūru. Bloķējiet to.'],
+    ['44', 'Atrasts šifra fragments: “V-Ē-J-Š”. Tas ir atslēgas vārds.'],
+    ['46', 'Upes šķērsošanas vieta ir sekla tikai pie vecā tilta.'],
+    ['47', 'Radiopārtvere: “tikšanās pie bākas pusnaktī”.'],
+    ['48', 'Ienaidnieka nometne atrodas aiz purva. Pieejas ceļš ir slapjš.'],
+    ['49', 'Pie ezera manīts drons. Maskējieties zem kokiem.'],
+    ['50', 'Ziņotājs pazudis. Pēdējā zināmā vieta: dzelzceļa pārbrauktuve.'],
+    ['51', 'Ienaidnieka transports: divas zilas automašīnas bez numuriem.'],
+    ['52', 'Atrasta piezīme ar koordinātēm. Nodot štābam izvērtēšanai.'],
+    ['53', 'Novērošanas punkts ar labu skatu uz visu līci. Ļoti vērtīgs.'],
+    ['54', 'Ienaidnieks plāno sakaru torņa izslēgšanu rītausmā.'],
+    ['55', 'Kāpu mežā atrasta ienaidnieka slēptuve ar pārtikas krājumiem.'],
+    ['56', 'Paroles maiņa: jaunā parole ir “SMILGA”.'],
+    ['57', 'Upes līkumā ierīkots ienaidnieka sakaru retranslators.'],
+    ['61', 'Pārtverta ienaidnieka komandiera ziņa. Štābs gaida!'],
+    ['62', 'Atklāts ienaidnieka izlūku maršruts. Svarīga informācija.'],
+    ['63', 'Ostas rajonā identificēts ienaidnieka loģistikas punkts.'],
+    ['81', 'Atrasta ienaidnieka operācijas karte ar visiem posteņiem!'],
+    ['82', 'Noskaidrots ienaidnieka štāba atrašanās vieta. Izcils darbs!'],
+    ['83', 'Ienaidnieka šifru grāmata ir jūsu rokās. Ārkārtīgi vērtīgi!'],
+    ['91', 'Izglābts mūsu pazudušais ziņotājs. Viņš zina visu plānu!'],
+    ['92', 'Galvenā izlūkziņa: ienaidnieka uzbrukuma laiks un vieta. Misija izšķirta!']
+  ].map(([id, m]) => ({ id, p: Number(id[0]), m }))
+};
