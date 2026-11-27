@@ -1,5 +1,5 @@
 // Misija — bezsaistes darbība. Mainot failus, palielini versiju.
-const CACHE = 'misija-v1';
+const CACHE = 'misija-v2';
 const FILES = [
   './', './index.html', './vaditajs.html', './common.js', './game.js', './jsqr.js', './qrcode.js',
   './site.webmanifest', './CADET_LV_LOGO.png', './favicon-32.png', './icon-192.png', './icon-512.png', './apple-touch-icon.png'

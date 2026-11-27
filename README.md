@@ -19,7 +19,7 @@ Kamerai vajadzīgs HTTPS, un GitHub Pages to nodrošina.
 4. **Finišs**: jaunsargs spiež “Finišs”, un viņa telefons parāda rezultāta QR. Vadītājs to noskenē sadaļā **Rezultāti**. Tabulu var lejupielādēt kā CSV.
 
 ## Noteikumi (noklusējums)
-60 min, −1 p. par katru sākto nokavēto minūti, vairāk nekā 30 min kavējuma = rezultāts netiek ieskaitīts. Visu var mainīt sadaļā **Misijas iestatījumi** (pēc tam jāizsūta jauna starta saite).
+180 min (3 h), −1 p. par katru sākto nokavēto minūti, vairāk nekā 30 min kavējuma = rezultāts netiek ieskaitīts. Visu var mainīt sadaļā **Misijas iestatījumi** (pēc tam jāizsūta jauna starta saite).
 
 ## Godīgums
 - KP kods ir piesaistīts misijas atslēgai, tāpēc izdomāt KP kodu nevar.

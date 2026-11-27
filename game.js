@@ -7,7 +7,7 @@ window.MISIJA_DEFAULT = {
   key: 'vejs-2026-cadet',
   title: 'Operācija VĒJŠ',
   brief: 'Piekrastē darbojas ienaidnieka izlūkgrupa. Mūsu novērotāji kontrolpunktos atstājuši šifrētas izlūkziņas. Jūsu uzdevums: savākt pēc iespējas vairāk izlūkziņu un atgriezties štābā pirms laika beigām. Tālākie un grūtākie punkti dod vairāk punktu. Par katru nokavēto minūti zaudējat punktus.',
-  min: 60,
+  min: 180,
   pen: 1,
   dq: 30,
   kp: [
