@@ -38,6 +38,13 @@ td textarea{min-height:38px}
 .qrbox{background:#fff;border-radius:12px;padding:8px;width:240px}
 .qrbox svg{display:block;width:100%;height:auto}
 video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio:4/3;object-fit:cover}
+.route{background:#0e140f;border:1px solid var(--line);border-radius:12px;padding:10px;margin:2px 0 8px}
+.rt th,.rt td{padding:5px 8px;border-bottom:1px solid #1f2a22;white-space:nowrap}
+.rt tr.slow td{background:#2e2810}
+.splitbar{height:8px;background:#1d2620;border-radius:4px;overflow:hidden;min-width:80px}
+.splitbar i{display:block;height:100%;background:var(--good)}
+.rt tr.slow .splitbar i{background:var(--warn)}
+.tag{display:inline-block;font:800 11px system-ui;padding:2px 6px;border-radius:6px;background:#2b3a2f;color:var(--good)}
 .code{font-family:ui-monospace,monospace;word-break:break-all;font-size:12px;background:#0e140f;padding:8px;border-radius:8px;border:1px solid var(--line)}
 /* Drukas lapa */
 #printArea{display:none}
@@ -206,7 +213,7 @@ function renderResults(){
   const rows=results.filter(r=>r.g===game.id).map(r=>({r,sc:M.score(game,r.s,r.f,r.v)}))
     .sort((a,b)=>(b.sc.total-a.sc.total)||(a.sc.usedMs-b.sc.usedMs));
   if(!rows.length){$('resTable').innerHTML='<tr><td class="mut">Vēl nav neviena rezultāta.</td></tr>';return}
-  $('resTable').innerHTML='<tr><th>#</th><th>Jaunsargs</th><th>Punkti</th><th>KP</th><th>Ziņojums</th><th>Laiks</th><th>Sods</th><th>Pakāpe</th><th>Pārb.</th><th>Apmeklētie KP</th><th></th></tr>'+
+  $('resTable').innerHTML='<tr><th>#</th><th>Jaunsargs</th><th>Punkti</th><th>KP</th><th>Ziņojums</th><th>Laiks</th><th>Sods</th><th>Pakāpe</th><th>Pārb.</th><th>Laiki</th><th></th></tr>'+
     rows.map(({r,sc},i)=>{
       const clockOff=Math.abs((r.scannedAt||r.f)-r.f)>15*60000||r.f<r.s;
       return `<tr><td>${i+1}</td><td><b>${M.esc(r.n)}</b><div class="mut small">${M.clock(r.s)}–${M.clock(r.f)}</div></td>
@@ -215,10 +222,35 @@ function renderResults(){
       <td>${sc.dq?'<span class="bad">DQ</span>':sc.penalty?`−${sc.penalty} (${sc.overMin} min)`:'—'}</td>
       <td>${sc.dq?'—':M.rank(game,sc.total)}</td>
       <td>${r.valid?'<span class="ok">✓</span>':'<span class="bad">✕</span>'}${clockOff?' <span class="warn" title="Finiša laiks telefonā ļoti atšķiras no skenēšanas brīža">⏱</span>':''}</td>
-      <td class="small">${r.v.map(([id,t])=>`${M.esc(id)}<span class="mut">@${M.fmt(t*1000)}</span>`).join(', ')}</td>
-      <td><button class="btn sec delres" style="padding:6px 10px" data-id="${M.esc(r.g+'|'+r.n+'|'+r.s)}">✕</button></td></tr>`}).join('');
+      <td><button class="btn sec route" style="padding:6px 10px;white-space:nowrap" data-k="${M.esc(rk(r))}">${openRoutes.has(rk(r))?'▾':'▸'} Maršruts</button></td>
+      <td><button class="btn sec delres" style="padding:6px 10px" data-id="${M.esc(rk(r))}">✕</button></td></tr>`+
+      (openRoutes.has(rk(r))?`<tr class="routeRow"><td></td><td colspan="10">${routeHtml(r)}</td></tr>`:'')}).join('');
 }
-$('resTable').addEventListener('click',e=>{const b=e.target.closest('.delres');if(!b)return;const id=b.dataset.id;if(!confirm('Dzēst šo rezultātu?'))return;results=results.filter(x=>x.g+'|'+x.n+'|'+x.s!==id);saveResults();renderResults()});
+const rk=r=>r.g+'|'+r.n+'|'+r.s;
+const openRoutes=new Set();
+function routeHtml(r){
+  const byId=Object.fromEntries(game.kp.map(k=>[k.id,k]));
+  const fname=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
+  const pts=[...r.v].sort((a,b)=>a[1]-b[1]);
+  const legs=[];let prev=0;
+  pts.forEach(([id,t])=>{legs.push({id,t,split:t-prev});prev=t});
+  const finT=Math.round((r.f-r.s)/1000);
+  legs.push({id:'FINIŠS',t:finT,split:finT-prev,fin:true});
+  const maxSplit=Math.max(1,...legs.map(l=>l.split));
+  const longest=legs.reduce((a,l)=>l.split>a.split?l:a,legs[0]);
+  let cum=0;
+  return `<div class="route"><table class="rt">
+    <tr><th>Nr.</th><th>KP</th><th>Punkti</th><th>Ziņa</th><th>Pulkstenis</th><th>No starta</th><th>Posms</th><th style="width:30%"></th></tr>
+    <tr class="mut"><td>—</td><td><b>STARTS</b></td><td></td><td></td><td>${M.clock(r.s)}</td><td>00:00</td><td></td><td></td></tr>`+
+    legs.map((l,i)=>{const k=byId[l.id];if(!l.fin&&k)cum+=k.p;
+      return `<tr${l===longest?' class="slow"':''}><td>${l.fin?'🏁':i+1}</td><td><b>${M.esc(l.id)}</b></td>
+      <td>${l.fin?`<span class="mut">kopā ${cum}</span>`:k?`+${k.p} <span class="mut small">(${cum})</span>`:'?'}</td>
+      <td>${!l.fin&&k?(k.f||[]).map(f=>`<span class="tag">${M.esc(fname(f))}</span>`).join(' '):''}</td>
+      <td>${M.clock(r.s+l.t*1000)}</td><td>${M.fmt(l.t*1000)}</td><td><b>${M.fmt(l.split*1000)}</b></td>
+      <td><div class="splitbar"><i style="width:${Math.max(2,l.split/maxSplit*100)}%"></i></div></td></tr>`}).join('')+
+    `</table><p class="mut small" style="margin:6px 0 0">Posms = laiks no iepriekšējā KP. Garākais posms iekrāsots dzeltens.</p></div>`;
+}
+$('resTable').addEventListener('click',e=>{const rb=e.target.closest('.route');if(rb){const k=rb.dataset.k;openRoutes.has(k)?openRoutes.delete(k):openRoutes.add(k);renderResults();return}const b=e.target.closest('.delres');if(!b)return;const id=b.dataset.id;if(!confirm('Dzēst šo rezultātu?'))return;results=results.filter(x=>x.g+'|'+x.n+'|'+x.s!==id);saveResults();renderResults()});
 
 $('scanBtn').onclick=async()=>{
   $('scanBox').classList.remove('hidden');$('scanStop').classList.remove('hidden');$('scanBtn').classList.add('hidden');
