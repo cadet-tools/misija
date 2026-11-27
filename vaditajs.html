@@ -140,8 +140,12 @@ video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio
         <div><label>Diskvalifikācija pēc kavējuma (min, 0 = nav)</label><input id="gDq" type="number" min="0"></div>
       </div>
       <div class="grid3"><div><label>Bonuss par pilnu ziņojumu (p.)</label><input id="gBonus" type="number" min="0"></div></div>
-      <label style="display:flex;gap:8px;align-items:center;margin-top:12px;color:#fff;font-size:15px"><input id="gGps" type="checkbox" style="width:auto"> Rādīt jaunsargam viņa atrašanās vietu kartē (GPS)</label>
-      <p class="mut small" style="margin:4px 0 0">Izslēgts: jaunsargi orientējas pēc kartes paši. Ieslēgts: vieglāk, piemērots iesācējiem.</p>
+      <div class="grid3">
+        <div><label>KP apstiprināšana</label><select id="gCheck" style="width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);background:#0e140f;color:#fff;font:15px system-ui">
+          <option value="both">QR kods vai GPS</option><option value="gps">Tikai GPS (QR nav jāizliek)</option><option value="qr">Tikai QR kods</option></select></div>
+        <div><label>GPS rādiuss ap KP (m)</label><input id="gRadius" type="number" min="10" max="100"></div>
+      </div>
+      <p class="mut small" style="margin:4px 0 0">Ar GPS jaunsargs pie KP spiež “📡 Esmu pie KP”. Telefons pārbauda, vai viņš ir rādiusā, un ieskaita KP. Jaunsargs neredz ne savu atrašanās vietu, ne attālumu līdz KP. Ieteicams 25–40 m, jo mežā telefona GPS kļūda bieži ir 10–20 m.</p>
     </div>
     <div class="card">
       <h2>Stāsts: ienaidnieka plāna ziņas</h2>
@@ -236,7 +240,7 @@ function routeHtml(r){
   const fname=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
   const pts=[...r.v].sort((a,b)=>a[1]-b[1]);
   const legs=[];let prev=0;
-  pts.forEach(([id,t])=>{legs.push({id,t,split:t-prev});prev=t});
+  pts.forEach(([id,t,mth])=>{legs.push({id,t,mth,split:t-prev});prev=t});
   const finT=Math.round((r.f-r.s)/1000);
   legs.push({id:'FINIŠS',t:finT,split:finT-prev,fin:true});
   const maxSplit=Math.max(1,...legs.map(l=>l.split));
@@ -246,12 +250,12 @@ function routeHtml(r){
     <tr><th>Nr.</th><th>KP</th><th>Punkti</th><th>Ziņa</th><th>Pulkstenis</th><th>No starta</th><th>Posms</th><th style="width:30%"></th></tr>
     <tr class="mut"><td>—</td><td><b>STARTS</b></td><td></td><td></td><td>${M.clock(r.s)}</td><td>00:00</td><td></td><td></td></tr>`+
     legs.map((l,i)=>{const k=byId[l.id];if(!l.fin&&k)cum+=k.p;
-      return `<tr${l===longest?' class="slow"':''}><td>${l.fin?'🏁':i+1}</td><td><b>${M.esc(l.id)}</b></td>
+      return `<tr${l===longest?' class="slow"':''}><td>${l.fin?'🏁':i+1}</td><td><b>${M.esc(l.id)}</b>${l.fin?'':l.mth==='g'?' <span title="Atzīmēts ar GPS">📡</span>':' <span title="Noskenēts QR">▦</span>'}</td>
       <td>${l.fin?`<span class="mut">kopā ${cum}</span>`:k?`+${k.p} <span class="mut small">(${cum})</span>`:'?'}</td>
       <td>${!l.fin&&k?(k.f||[]).map(f=>`<span class="tag">${M.esc(fname(f))}</span>`).join(' '):''}</td>
       <td>${M.clock(r.s+l.t*1000)}</td><td>${M.fmt(l.t*1000)}</td><td><b>${M.fmt(l.split*1000)}</b></td>
       <td><div class="splitbar"><i style="width:${Math.max(2,l.split/maxSplit*100)}%"></i></div></td></tr>`}).join('')+
-    `</table><p class="mut small" style="margin:6px 0 0">Posms = laiks no iepriekšējā KP. Garākais posms iekrāsots dzeltens.</p></div>`;
+    `</table><p class="mut small" style="margin:6px 0 0">📡 = atzīmēts ar GPS, ▦ = QR kods. Posms = laiks no iepriekšējā KP. Garākais posms iekrāsots dzeltens.</p></div>`;
 }
 $('resTable').addEventListener('click',e=>{const rb=e.target.closest('.route');if(rb){const k=rb.dataset.k;openRoutes.has(k)?openRoutes.delete(k):openRoutes.add(k);renderResults();return}const b=e.target.closest('.delres');if(!b)return;const id=b.dataset.id;if(!confirm('Dzēst šo rezultātu?'))return;results=results.filter(x=>x.g+'|'+x.n+'|'+x.s!==id);saveResults();renderResults()});
 
@@ -295,7 +299,10 @@ $('printStart').onclick=()=>{
 
 /* ---------- DRUKĀT ---------- */
 function renderKpCodes(){
-  $('kpCodes').innerHTML='<tr><th>KP</th><th>Punkti</th><th>Rokas kods</th><th>QR saite</th></tr>'+game.kp.map(k=>`<tr><td><b>${M.esc(k.id)}</b></td><td>${k.p}</td><td><b style="font-family:monospace;font-size:16px">${M.kpCode(game.key,k.id)}</b></td><td class="small mut" style="word-break:break-all">${M.esc(kpUrl(k))}</td></tr>`).join('');
+  $('kpCodes').innerHTML='<tr><th>KP</th><th>Punkti</th><th>Rokas kods</th><th>GPS koordinātas</th><th>QR saite</th></tr>'+game.kp.map(k=>{const ll=M.kpLatLng(game,k);
+    return `<tr><td><b>${M.esc(k.id)}</b></td><td>${k.p}</td><td><b style="font-family:monospace;font-size:16px">${M.kpCode(game.key,k.id)}</b></td>
+    <td class="small">${ll?`<a style="color:#8fd3ff" target="_blank" href="https://www.google.com/maps?q=${ll[0].toFixed(6)},${ll[1].toFixed(6)}">${ll[0].toFixed(5)}, ${ll[1].toFixed(5)}</a>`:'<span class="bad">nav</span>'}</td>
+    <td class="small mut" style="word-break:break-all">${M.esc(kpUrl(k))}</td></tr>`}).join('');
 }
 $('printKp').onclick=()=>{
   const cards=game.kp.map(k=>`<div class="pcard"><div class="kp">KP ${M.esc(k.id)}</div><div class="pts">${k.p} ${k.p===1?'punkts':'punkti'}</div><div class="pq">${M.qrSvg(kpUrl(k),'M')}</div><div class="cd">Kods: ${M.kpCode(game.key,k.id)}</div><div class="ft">${M.esc(game.title)} · CADET.LV</div></div>`);
@@ -306,7 +313,7 @@ $('printKp').onclick=()=>{
 /* ---------- IESTATĪJUMI ---------- */
 function renderGameForm(){
   game.facts=game.facts||[];game.end=game.end||{full:'',part:'',fail:''};
-  $('gTitle').value=game.title;$('gBrief').value=game.brief;$('gMin').value=game.min;$('gPen').value=game.pen;$('gDq').value=game.dq;$('gBonus').value=game.bonus||0;$('gGps').checked=!!game.gps;
+  $('gTitle').value=game.title;$('gBrief').value=game.brief;$('gMin').value=game.min;$('gPen').value=game.pen;$('gDq').value=game.dq;$('gBonus').value=game.bonus||0;$('gCheck').value=game.check||'qr';$('gRadius').value=game.radius||30;
   $('eFull').value=game.end.full||'';$('ePart').value=game.end.part||'';$('eFail').value=game.end.fail||'';
   $('factTable').innerHTML='<tr><th style="width:110px">ID</th><th style="width:130px">Nosaukums</th><th>Ziņas teksts ziņojumā</th><th>Atrodama KP</th><th></th></tr>'+
     game.facts.map((f,i)=>`<tr><td><input data-fi="${i}" data-f="id" value="${M.esc(f.id)}"></td><td><input data-fi="${i}" data-f="t" value="${M.esc(f.t)}"></td><td><textarea data-fi="${i}" data-f="x">${M.esc(f.x)}</textarea></td><td class="small">${game.kp.filter(k=>(k.f||[]).includes(f.id)).map(k=>k.id).join(', ')||'<span class="bad">nekur!</span>'}</td><td><button class="btn sec" style="padding:6px 10px" onclick="delFact(${i})">✕</button></td></tr>`).join('');
@@ -316,7 +323,7 @@ function renderGameForm(){
 function readGameForm(){
   game.title=$('gTitle').value.trim()||'Misija';game.brief=$('gBrief').value.trim();
   game.min=Math.max(1,+$('gMin').value||60);game.pen=Math.max(0,+$('gPen').value||0);game.dq=Math.max(0,+$('gDq').value||0);
-  game.bonus=Math.max(0,+$('gBonus').value||0);game.gps=$('gGps').checked;
+  game.bonus=Math.max(0,+$('gBonus').value||0);game.check=$('gCheck').value;game.radius=Math.min(200,Math.max(5,+$('gRadius').value||30));
   game.end={full:$('eFull').value.trim(),part:$('ePart').value.trim(),fail:$('eFail').value.trim()};
   document.querySelectorAll('#factTable [data-fi]').forEach(el=>{game.facts[+el.dataset.fi][el.dataset.f]=el.value.trim()});
   game.facts=game.facts.filter(f=>f.id);

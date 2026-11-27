@@ -175,5 +175,33 @@
 
   M.buzz = p => { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} };
 
+  // GPS: KP koordinātas no kartes piesaistes (attēla px,py → lat,lng)
+  function solve3(A, b) {
+    const m = A.map((r, i) => [...r, b[i]]);
+    for (let c = 0; c < 3; c++) {
+      let p = c; for (let r = c + 1; r < 3; r++) if (Math.abs(m[r][c]) > Math.abs(m[p][c])) p = r;
+      [m[c], m[p]] = [m[p], m[c]];
+      for (let r = 0; r < 3; r++) if (r !== c) { const f = m[r][c] / m[c][c]; for (let k = c; k < 4; k++) m[r][k] -= f * m[c][k]; }
+    }
+    return [m[0][3] / m[0][0], m[1][3] / m[1][1], m[2][3] / m[2][2]];
+  }
+  M.pxToLatLng = game => {
+    const geo = game.geo; if (!geo || geo.length < 3) return null;
+    const A = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], bl = [0, 0, 0], bg = [0, 0, 0];
+    for (const [px, py, lat, lng] of geo) {
+      const v = [px / 1000, py / 1000, 1];
+      for (let i = 0; i < 3; i++) { for (let j = 0; j < 3; j++) A[i][j] += v[i] * v[j]; bl[i] += v[i] * lat; bg[i] += v[i] * lng; }
+    }
+    const a = solve3(A, bl), b = solve3(A, bg);
+    return (px, py) => [a[0] * px / 1000 + a[1] * py / 1000 + a[2], b[0] * px / 1000 + b[1] * py / 1000 + b[2]];
+  };
+  M.kpLatLng = (game, k) => {
+    if (k.lat != null && k.lng != null) return [k.lat, k.lng];
+    if (k.x == null || k.y == null) return null;
+    const f = M.pxToLatLng(game); return f ? f(k.x, k.y) : null;
+  };
+  M.dist = (a, b, c, d) => { const R = 6371000, r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
+  M.checkMode = game => game.check || 'qr'; // 'qr' | 'gps' | 'both'
+
   window.M = M;
 })();

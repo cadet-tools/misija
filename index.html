@@ -103,6 +103,7 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
         <div class="stat"><b id="sKp">0</b><span>KP</span></div>
         <div class="stat"><b id="sMax">0</b><span>max</span></div>
       </div>
+      <button class="btn scanbtn" id="gpsBtn" style="background:#4aa3ff;color:#04121f">📡 ESMU PIE KP</button>
       <button class="btn scanbtn" id="scanBtn">📷 SKENĒT KP</button>
       <button class="btn sec" id="mapBtn2" style="margin-bottom:10px;font-size:19px;padding:18px">🗺 KARTE</button>
       <button class="btn sec" id="manualBtn">⌨ Ievadīt kodu ar roku</button>
@@ -146,13 +147,12 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
 
 <!-- Karte -->
 <div id="mapOv" class="hidden">
-  <div class="mapbar"><div class="t" id="mapTitle">Karte</div><span class="mut small" id="gpsInfo"></span><button class="btn sec" style="width:auto;padding:10px 14px" id="mapClose">✕ Aizvērt</button></div>
+  <div class="mapbar"><div class="t" id="mapTitle">Karte</div><button class="btn sec" style="width:auto;padding:10px 14px" id="mapClose">✕ Aizvērt</button></div>
   <div id="mapVp">
     <div class="maptools">
       <button id="mzIn" aria-label="Tuvināt">+</button>
       <button id="mzOut" aria-label="Attālināt">−</button>
       <button id="mzFit" aria-label="Visa misija" style="font-size:18px">⤢</button>
-      <button id="mzGps" class="hidden" aria-label="Kur es esmu" style="font-size:20px">📍</button>
     </div>
     <div class="maplegend"><span class="dot" style="background:#fff;border:2px solid #c51fc5"></span>jāapmeklē · <span class="dot" style="background:#5fd07a;border:2px solid #0d5c22"></span>apmeklēts<br><span style="color:#e07ae0">△</span> starts/finišs · <span id="mapCount"></span></div>
   </div>
@@ -163,6 +163,17 @@ label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
   <div class="frame"><video id="video" playsinline muted></video></div>
   <p class="mut" id="scanMsg">Notēmē kameru uz KP QR kodu</p>
   <div class="tools"><button class="btn sec" id="scanClose">Aizvērt</button></div>
+</div>
+
+<!-- GPS pārbaude -->
+<div class="ov hidden" id="gpsOv">
+  <div class="card" style="width:100%;max-width:480px;text-align:center">
+    <div style="font-size:54px">📡</div>
+    <h2 id="gpsTitle">Nosaka atrašanās vietu…</h2>
+    <p class="mut" id="gpsText">Stāvi mierīgi pie KP, ja iespējams, atklātā vietā. Tas var aizņemt līdz 30 sekundēm.</p>
+    <p class="small" id="gpsAcc"></p>
+    <button class="btn sec" id="gpsCancel">Atcelt</button>
+  </div>
 </div>
 
 <!-- Rokas ievade -->
@@ -232,7 +243,7 @@ function render(){
     $('vBrief').classList.remove('hidden');
     $('briefTitle').textContent=game.title;
     $('briefText').textContent=game.brief;
-    $('briefRules').textContent=`Laiks: ${game.min} min · kontrolpunkti: ${game.kp.length} · kopā iespējami ${M.maxPoints(game)} punkti · sods: −${game.pen} p. par katru nokavēto minūti`+(game.dq>0?` · kavējot vairāk nekā ${game.dq} min, rezultāts netiek ieskaitīts`:'')+((game.facts||[]).length&&game.bonus?` · par pilnu izlūkošanas ziņojumu (${game.facts.length}/${game.facts.length} ziņas) +${game.bonus} p. bonuss.`:'.');
+    $('briefRules').textContent=`Laiks: ${game.min} min · kontrolpunkti: ${game.kp.length} · kopā iespējami ${M.maxPoints(game)} punkti · sods: −${game.pen} p. par katru nokavēto minūti`+(game.dq>0?` · kavējot vairāk nekā ${game.dq} min, rezultāts netiek ieskaitīts`:'')+(M.checkMode(game)==='gps'?' · KP atzīmē ar GPS: pie KP spied “📡 Esmu pie KP”':M.checkMode(game)==='both'?' · KP atzīmē, noskenējot QR kodu vai ar GPS (“📡 Esmu pie KP”)':'')+((game.facts||[]).length&&game.bonus?` · par pilnu izlūkošanas ziņojumu (${game.facts.length}/${game.facts.length} ziņas) +${game.bonus} p. bonuss.`:'.');
     if(st&&st.name)$('name').value=st.name;
   }else if(!st.finish){
     $('vRun').classList.remove('hidden');
@@ -240,6 +251,10 @@ function render(){
     $('sMax').textContent=M.maxPoints(game);
     renderIntel($('intelList'));
     renderFacts();
+    const mode=M.checkMode(game);
+    $('gpsBtn').classList.toggle('hidden',mode==='qr');
+    $('scanBtn').classList.toggle('hidden',mode==='gps');
+    $('manualBtn').classList.toggle('hidden',mode==='gps');
     tickTimer(); timerInt=setInterval(tickTimer,1000);
   }else{
     $('vDone').classList.remove('hidden');
@@ -257,8 +272,8 @@ function render(){
 function renderIntel(el){
   const byId=Object.fromEntries(game.kp.map(k=>[k.id,k]));
   if(!st.visits.length){el.innerHTML='<span class="mut">Vēl nav neviena. Dodies pie pirmā KP!</span>';return}
-  el.innerHTML=[...st.visits].reverse().map(([id,t])=>{const k=byId[id]||{p:0,m:''};
-    return `<div class="intel"><b>KP ${M.esc(id)} · +${k.p} p.</b>${(k.f||[]).map(f=>`<span class="tag">${M.esc(factName(f))}</span>`).join('')} <span class="mut small">${M.clock(st.start+t*1000)}</span><div>${M.esc(k.m)}</div></div>`}).join('');
+  el.innerHTML=[...st.visits].reverse().map(([id,t,mth])=>{const k=byId[id]||{p:0,m:''};
+    return `<div class="intel"><b>KP ${M.esc(id)} · +${k.p} p.</b>${(k.f||[]).map(f=>`<span class="tag">${M.esc(factName(f))}</span>`).join('')} <span class="mut small">${mth==='g'?'📡 ':''}${M.clock(st.start+t*1000)}</span><div>${M.esc(k.m)}</div></div>`}).join('');
 }
 const factName=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
 
@@ -298,16 +313,23 @@ $('startBtn').onclick=()=>{
   if(!name){$('name').focus();alert('Ieraksti savu vārdu vai komandas nosaukumu.');return}
   if(!confirm(`Sākt misiju "${game.title}"? Laiks sāks skaitīties uzreiz.`))return;
   st={name,start:Date.now(),finish:null,visits:[]}; save(); M.buzz(80); render();
+  // GPS atļauju prasām uzreiz pie starta, kamēr vadītājs ir blakus
+  if(M.checkMode(game)!=='qr'&&navigator.geolocation)navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,timeout:15000});
 };
 
 function handleKp(id,code){
   if(!st||!st.start){showRes('err','!','Vispirms sāc misiju','Ieraksti vārdu un spied “Sākt misiju”, tad skenē KP vēlreiz.');return}
   if(st.finish){showRes('err','!','Misija jau pabeigta','Pēc finiša KP vairs netiek ieskaitīti.');return}
+  if(M.checkMode(game)==='gps'){showRes('err','!','Šajā misijā KP atzīmē ar GPS','Spied “📡 Esmu pie KP”.');return}
   const k=game.kp.find(x=>x.id===String(id));
   if(!k||M.kpCode(game.key,k.id)!==String(code).toUpperCase()){M.buzz([60,60,60]);showRes('err','✕','Nederīgs kods','Šis kods nepieder šai misijai. Pārbaudi KP numuru un kodu.');return}
+  registerKp(k,'q');
+}
+
+function registerKp(k,method){
   if(st.visits.some(v=>v[0]===k.id)){M.buzz(120);showRes('dup','✓',`KP ${k.id} jau ieskaitīts`,'Šo punktu tu jau esi apmeklējis.',k);return}
   const before=M.foundFacts(game,st.visits);
-  st.visits.push([k.id,Math.round((Date.now()-st.start)/1000)]); save(); M.buzz([100,50,200]);
+  st.visits.push(method==='g'?[k.id,Math.round((Date.now()-st.start)/1000),'g']:[k.id,Math.round((Date.now()-st.start)/1000)]); save(); M.buzz([100,50,200]);
   const after=M.foundFacts(game,st.visits);
   const fresh=(game.facts||[]).filter(f=>after.has(f.id)&&!before.has(f.id));
   const known=(k.f||[]).filter(id=>before.has(id));
@@ -363,15 +385,45 @@ function openMap(){
   const vis=new Set((st&&st.visits||[]).map(v=>v[0]));
   mapView.setVisited(vis);
   $('mapCount').textContent=`${vis.size}/${game.kp.length} KP`;
-  $('mzGps').classList.toggle('hidden',!mapView.hasGps);
-  $('gpsInfo').textContent='';
-  if(mapView.hasGps)mapView.startGps(t=>$('gpsInfo').textContent='📍 '+t);
   requestAnimationFrame(()=>mapView.fit());
 }
 $('mapBtn1').onclick=openMap; $('mapBtn2').onclick=openMap;
-$('mapClose').onclick=()=>{$('mapOv').classList.add('hidden');if(mapView)mapView.stopGps()};
+$('mapClose').onclick=()=>$('mapOv').classList.add('hidden');
 $('mzIn').onclick=()=>mapView.zoom(1.5); $('mzOut').onclick=()=>mapView.zoom(1/1.5); $('mzFit').onclick=()=>mapView.fit();
-$('mzGps').onclick=()=>{if(!mapView.centerGps())$('gpsInfo').textContent='📍 gaidu GPS signālu…'};
+
+let gpsWatch=null,gpsTimer=null;
+function stopGpsCheck(){if(gpsWatch!=null)navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;clearTimeout(gpsTimer);$('gpsOv').classList.add('hidden')}
+$('gpsCancel').onclick=stopGpsCheck;
+$('gpsBtn').onclick=()=>{
+  if(!navigator.geolocation){alert('Šis telefons neatbalsta GPS pārlūkā.');return}
+  const R=game.radius||30, MAXACC=Math.max(35,R*1.5);
+  const pts=game.kp.map(k=>({k,ll:M.kpLatLng(game,k)})).filter(o=>o.ll);
+  let best=null,started=Date.now(),done=false,soon=null;
+  $('gpsTitle').textContent='Nosaka atrašanās vietu…';$('gpsAcc').textContent='';
+  $('gpsText').textContent='Stāvi mierīgi pie KP, ja iespējams, atklātā vietā. Tas var aizņemt līdz 30 sekundēm.';
+  $('gpsOv').classList.remove('hidden');
+  const finish=()=>{
+    if(done)return; done=true; clearTimeout(soon);
+    stopGpsCheck();
+    if(!best){showRes('err','📡','Nav GPS signāla','Pārliecinies, ka telefonā ieslēgta atrašanās vieta un pārlūkam tā atļauta. Pamēģini vēlreiz atklātākā vietā.');return}
+    if(best.acc>MAXACC){showRes('err','📡','GPS signāls par vāju',`Precizitāte ±${Math.round(best.acc)} m. Pagaidi brīdi atklātākā vietā un mēģini vēlreiz.`);return}
+    // tuvākais KP rādiusā (neizpaužam attālumu)
+    let hit=null;
+    for(const o of pts){const d=M.dist(best.lat,best.lng,o.ll[0],o.ll[1]);if(d<=R+Math.min(best.acc,15)&&(!hit||d<hit.d))hit={k:o.k,d}}
+    if(!hit){M.buzz([60,60,60]);showRes('err','✕','Tuvumā nav misijas KP','Šeit neviens KP netika atrasts. Pārbaudi karti un pieej tuvāk KP vietai.');return}
+    registerKp(hit.k,'g');
+  };
+  gpsWatch=navigator.geolocation.watchPosition(p=>{
+    const c=p.coords;
+    if(!best||c.accuracy<best.acc)best={lat:c.latitude,lng:c.longitude,acc:c.accuracy};
+    $('gpsAcc').textContent=`Precizitāte: ±${Math.round(c.accuracy)} m`;
+    // pietiekami precīzs un pagājušas vismaz 3 s
+    if(best.acc<=Math.min(20,MAXACC)&&!soon)soon=setTimeout(finish,Math.max(0,3000-(Date.now()-started)));
+  },err=>{
+    if(err.code===1){stopGpsCheck();showRes('err','📡','Atrašanās vieta nav atļauta','Atļauj pārlūkam piekļūt atrašanās vietai (pārlūka iestatījumos) un mēģini vēlreiz.')}
+  },{enableHighAccuracy:true,maximumAge:0,timeout:30000});
+  gpsTimer=setTimeout(finish,30000);
+};
 
 $('finishBtn').onclick=()=>{
   if(!confirm('Vai tiešām esi štābā? Pēc finiša vairs nevarēsi skenēt KP.'))return;
