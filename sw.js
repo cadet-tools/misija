@@ -1,17 +1,24 @@
-// Misija — bezsaistes darbība. Mainot failus, palielini versiju.
-const CACHE = 'misija-v14';
-const FILES = [
-  './', './index.html', './vaditajs.html', './common.js', './ops.js', './game.js', './map.js', './sfx.js', './fonts/fonts.css',
-  './fonts/saira-stencil-one-latin-400-normal.woff2', './fonts/saira-stencil-one-latin-ext-400-normal.woff2',
-  './fonts/saira-condensed-latin-600-normal.woff2', './fonts/saira-condensed-latin-ext-600-normal.woff2',
-  './fonts/saira-condensed-latin-700-normal.woff2', './fonts/saira-condensed-latin-ext-700-normal.woff2',
-  './fonts/jetbrains-mono-latin-400-normal.woff2', './fonts/jetbrains-mono-latin-ext-400-normal.woff2',
-  './fonts/jetbrains-mono-latin-700-normal.woff2', './fonts/jetbrains-mono-latin-ext-700-normal.woff2', './lof-map.jpg', './jsqr.js', './qrcode.js',
-  './site.webmanifest', './CADET_LV_LOGO.png', './favicon-32.png', './icon-192.png', './icon-512.png', './apple-touch-icon.png'
-];
+// Misija: bezsaistes darbība. Failu saraksts un versija ir assets.js.
+importScripts('assets.js');
+const CACHE = self.MISIJA_CACHE, FILES = self.MISIJA_ASSETS;
 
+// Instalēšana: katru failu ielādē un saglabā atsevišķi (lapa rāda progresu)
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
+  e.waitUntil((async () => {
+    const cache = await caches.open(CACHE);
+    await Promise.all(FILES.map(async f => {
+      if (await cache.match(f)) return;
+      for (let i = 0; i < 3; i++) {
+        try {
+          const res = await fetch(new Request(f, { cache: 'reload' }));
+          if (res.ok) { await cache.put(f, res); return; }
+        } catch (err) {}
+        await new Promise(r => setTimeout(r, 800 * (i + 1)));
+      }
+      throw new Error('Neizdevās ielādēt ' + f);
+    }));
+    await self.skipWaiting();
+  })());
 });
 
 self.addEventListener('activate', e => {
@@ -21,24 +28,24 @@ self.addEventListener('activate', e => {
   );
 });
 
-// Ja ir internets — jaunākā versija no tīkla (max 4 s); bez interneta — no kešatmiņas
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
+  const isPage = req.mode === 'navigate' || /\.html?$/.test(new URL(req.url).pathname) || new URL(req.url).pathname.endsWith('/');
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    try {
-      const res = await Promise.race([
-        fetch(req, { cache: 'no-cache' }),
-        new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))
-      ]);
-      if (res && res.ok) { cache.put(req, res.clone()); return res; }
-      throw new Error('bad');
-    } catch (err) {
-      const cached = await cache.match(req, { ignoreSearch: true });
-      if (cached) return cached;
-      if (req.mode === 'navigate') return (await cache.match('./index.html')) || Response.error();
-      return Response.error();
+    if (isPage) {
+      // Lapas: ja ir internets, jaunākā (max 3 s); citādi saglabātā
+      try {
+        const res = await Promise.race([fetch(req, { cache: 'no-cache' }), new Promise((_, rej) => setTimeout(() => rej(new Error('t')), 3000))]);
+        if (res && res.ok) { cache.put(req, res.clone()); return res; }
+      } catch (err) {}
+      return (await cache.match(req, { ignoreSearch: true })) || (await cache.match('./index.html')) || Response.error();
     }
+    // Pārējie faili: no kešatmiņas uzreiz (versija mainās ar katru atjauninājumu)
+    const hit = await cache.match(req, { ignoreSearch: true });
+    if (hit) return hit;
+    try { const res = await fetch(req); if (res && res.ok) cache.put(req, res.clone()); return res; }
+    catch (err) { return Response.error(); }
   })());
 });
