@@ -65,6 +65,10 @@
   // Rezultāta QR: MR1.<base64url JSON>
   M.encodeResult = (game, st) => {
     const body = { g: game.id, n: st.name, s: st.start, f: st.finish, v: st.visits };
+    // Operators, papildlaiks (min) un īpašību žurnāls, ja izmantoti
+    if (st.op) body.o = st.op;
+    if (st.extra) body.x = st.extra;
+    if (st.uses && st.uses.length) body.u = st.uses;
     const json = JSON.stringify(body);
     body.h = M.sign(game.key, json);
     return 'MR1.' + M.b64e(enc.encode(JSON.stringify(body)));
@@ -80,24 +84,36 @@
   };
 
   // Punktu aprēķins (vienāds abās lapās)
-  M.score = (game, start, finish, visits) => {
+  // Apmeklējums: [kpId, sekundes no starta, metode 'g'|'q'|undefined, karodziņi 'x2' un/vai 'o:<ziņa>' ar komatu]
+  M.vflags = v => String(v[3] || '').split(',').filter(Boolean);
+  M.score = (game, start, finish, visits, extraMin = 0) => {
     const pts = Object.fromEntries(game.kp.map(k => [k.id, k.p]));
-    const seen = new Set(); let raw = 0;
-    for (const [id] of visits) if (!seen.has(id) && pts[id] != null) { seen.add(id); raw += pts[id]; }
+    const seen = new Set(); let raw = 0, doubled = 0;
+    for (const v of visits) {
+      const id = v[0];
+      if (seen.has(id) || pts[id] == null) continue;
+      seen.add(id);
+      const x2 = M.vflags(v).includes('x2');
+      raw += pts[id] * (x2 ? 2 : 1); if (x2) doubled += pts[id];
+    }
     const facts = M.foundFacts(game, visits);
     const nFacts = (game.facts || []).length;
     const complete = nFacts > 0 && facts.size === nFacts;
     const bonus = complete ? (game.bonus || 0) : 0;
     const usedMs = Math.max(0, (finish || Date.now()) - start);
-    const overMin = Math.max(0, Math.ceil(usedMs / 60000 - game.min - 1e-9));
+    const limit = game.min + (extraMin || 0);
+    const overMin = Math.max(0, Math.ceil(usedMs / 60000 - limit - 1e-9));
     const penalty = overMin * game.pen;
     const dq = game.dq > 0 && overMin > game.dq;
-    return { raw, penalty, bonus, facts, nFacts, complete, total: dq ? 0 : Math.max(0, raw + bonus - penalty), overMin, dq, count: seen.size, usedMs };
+    return { raw, penalty, bonus, facts, nFacts, complete, total: dq ? 0 : Math.max(0, raw + bonus - penalty), overMin, dq, count: seen.size, usedMs, doubled, limit };
   };
   M.foundFacts = (game, visits) => {
     const byId = Object.fromEntries(game.kp.map(k => [k.id, k]));
     const out = new Set();
-    for (const [id] of visits) for (const f of (byId[id]?.f || [])) out.add(f);
+    for (const v of visits) {
+      for (const f of (byId[v[0]]?.f || [])) out.add(f);
+      for (const fl of M.vflags(v)) if (fl.startsWith('o:')) out.add(fl.slice(2));
+    }
     return new Set((game.facts || []).map(f => f.id).filter(id => out.has(id)));
   };
   M.maxPoints = game => game.kp.reduce((a, k) => a + k.p, 0) + ((game.facts || []).length ? (game.bonus || 0) : 0);

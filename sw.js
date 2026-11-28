@@ -1,7 +1,12 @@
 // Misija — bezsaistes darbība. Mainot failus, palielini versiju.
-const CACHE = 'misija-v8';
+const CACHE = 'misija-v9';
 const FILES = [
-  './', './index.html', './vaditajs.html', './common.js', './game.js', './map.js', './lof-map.jpg', './jsqr.js', './qrcode.js',
+  './', './index.html', './vaditajs.html', './common.js', './ops.js', './game.js', './map.js', './fonts/fonts.css',
+  './fonts/saira-stencil-one-latin-400-normal.woff2', './fonts/saira-stencil-one-latin-ext-400-normal.woff2',
+  './fonts/saira-condensed-latin-600-normal.woff2', './fonts/saira-condensed-latin-ext-600-normal.woff2',
+  './fonts/saira-condensed-latin-700-normal.woff2', './fonts/saira-condensed-latin-ext-700-normal.woff2',
+  './fonts/jetbrains-mono-latin-400-normal.woff2', './fonts/jetbrains-mono-latin-ext-400-normal.woff2',
+  './fonts/jetbrains-mono-latin-700-normal.woff2', './fonts/jetbrains-mono-latin-ext-700-normal.woff2', './lof-map.jpg', './jsqr.js', './qrcode.js',
   './site.webmanifest', './CADET_LV_LOGO.png', './favicon-32.png', './icon-192.png', './icon-512.png', './apple-touch-icon.png'
 ];
 

@@ -3,357 +3,553 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0c100d">
+<meta name="theme-color" content="#0a0e0a">
 <title>Misija · CADET.LV</title>
 <link rel="manifest" href="site.webmanifest">
 <link rel="icon" href="favicon-32.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
-:root{--bg:#0c100d;--card:#141b16;--line:#2b382e;--txt:#eef3ee;--mut:#9aab9e;--good:#5fd07a;--warn:#f0c04a;--bad:#ff6b6b;--acc:#c8a96a}
+:root{--bg:#0a0e0a;--panel:#0f150f;--line:#2c3d28;--line2:#3d5338;--txt:#E6EDE3;--mut:#9DB19A;--g:#7CFF6B;--amber:#FFB547;--red:#FF5A4E;--acc:#7CFF6B;--accsoft:rgba(124,255,107,.35)}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;-webkit-tap-highlight-color:transparent}
-body{min-height:100vh;padding:calc(12px + env(safe-area-inset-top)) 14px calc(24px + env(safe-area-inset-bottom))}
-.wrap{max-width:560px;margin:0 auto}
-header{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-header img{height:26px}
-header .t{flex:1;font-weight:800;letter-spacing:.3px}
-header .net{font-size:12px;color:var(--mut)}
-.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:12px}
-h1{font-size:26px;margin:0 0 6px}h2{font-size:18px;margin:0 0 8px}
-.mut{color:var(--mut);font-size:14px}
-.btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font:800 17px system-ui;color:#07120a;background:var(--good);cursor:pointer}
-.btn.sec{background:#26332a;color:#fff}.btn.warn{background:var(--acc);color:#1a1307}.btn.bad{background:#6a2a2b;color:#fff}
-.btn:disabled{opacity:.45}
-.row{display:flex;gap:10px}.row>*{flex:1}
-input{width:100%;padding:14px;border-radius:12px;border:1px solid var(--line);background:#0e140f;color:#fff;font-size:17px}
-label{display:block;font-size:14px;color:var(--mut);margin:0 0 6px}
-.timer{font:800 56px/1 ui-monospace,SFMono-Regular,Menlo,monospace;text-align:center;letter-spacing:1px}
-.timer.late{color:var(--bad)}
-.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
-.stat{background:#0e140f;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
-.stat b{display:block;font-size:24px}.stat span{font-size:12px;color:var(--mut);text-transform:uppercase}
-.scanbtn{font-size:22px;padding:22px;margin:12px 0}
-.intel{border-left:3px solid var(--acc);padding:8px 10px;margin:8px 0;background:#10170f;border-radius:0 10px 10px 0}
-.intel b{color:var(--acc)}
+html,body{margin:0;background:#070a07;color:var(--txt);-webkit-tap-highlight-color:transparent}
+body{font:600 16px/1.35 'Saira Condensed',system-ui,sans-serif;min-height:100vh;
+  background-color:var(--bg);background-image:linear-gradient(rgba(124,255,107,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(124,255,107,.05) 1px,transparent 1px);background-size:26px 26px;
+  padding:calc(12px + env(safe-area-inset-top)) 14px calc(22px + env(safe-area-inset-bottom))}
+.wrap{max-width:520px;margin:0 auto;display:flex;flex-direction:column;gap:12px}
+.mono{font-family:'JetBrains Mono',ui-monospace,monospace}
+.st{font-family:'Saira Stencil One','Saira Condensed',sans-serif;font-weight:400}
+.mut{color:var(--mut)}.small{font-size:13px}
 .hidden{display:none!important}
-.ov{position:fixed;inset:0;z-index:50;background:rgba(5,8,6,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
-.ov video{width:100%;max-width:520px;border-radius:18px;background:#000;aspect-ratio:3/4;object-fit:cover}
-.ov .frame{position:relative;width:100%;max-width:520px}
-.ov .frame:after{content:"";position:absolute;inset:18%;border:3px solid var(--good);border-radius:16px;box-shadow:0 0 0 2000px rgba(0,0,0,.25)}
-.ov .tools{width:100%;max-width:520px;margin-top:14px;display:grid;gap:10px}
-.res{text-align:center}
-.res .big{font:900 64px/1 system-ui;margin:6px 0}
-.res.ok .big{color:var(--good)}.res.dup .big{color:var(--warn)}.res.err .big{color:var(--bad)}
-.qr{background:#fff;border-radius:16px;padding:10px;max-width:360px;margin:10px auto}
-.qr svg{display:block;width:100%;height:auto}
-.rank{font:900 28px system-ui;color:var(--acc);text-align:center}
-.small{font-size:13px}
-#mapOv{position:fixed;inset:0;z-index:40;background:#0c100d;display:flex;flex-direction:column}
+.bar{display:flex;align-items:center;justify-content:space-between;font:400 11px 'JetBrains Mono',monospace;letter-spacing:1.5px;color:var(--mut)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--acc);margin-right:8px;animation:blink 1.6s infinite}
+@keyframes blink{50%{opacity:.25}}
+.panel{border:1px solid var(--line);background:var(--panel);padding:14px;position:relative}
+.corner:before,.corner:after{content:"";position:absolute;width:14px;height:14px}
+.corner:before{top:-1px;left:-1px;border-top:2px solid var(--acc);border-left:2px solid var(--acc)}
+.corner:after{bottom:-1px;right:-1px;border-bottom:2px solid var(--acc);border-right:2px solid var(--acc)}
+.lbl{font-size:13px;letter-spacing:2px;color:var(--mut);text-transform:uppercase}
+.tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.tile{border:1px solid var(--line);background:var(--panel);padding:10px 6px;text-align:center}
+.tile b{display:block;font:700 22px 'JetBrains Mono',monospace;color:var(--acc)}
+.tile span{font-size:12px;letter-spacing:1.5px;color:var(--mut)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px dashed var(--line2);padding:4px 8px;color:#B7C6B2;font:700 12px 'JetBrains Mono',monospace}
+.fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;text-align:center;font:700 12px 'JetBrains Mono',monospace}
+.fgrid span{border:1px dashed var(--line2);color:#6f8a6a;padding:7px 0}
+.fgrid span.on{background:#173a14;border:1px solid var(--g);color:var(--g)}
+input,select{width:100%;height:50px;background:#060906;border:1px solid var(--line2);color:var(--txt);font:400 17px 'JetBrains Mono',monospace;padding:0 14px;outline:none;border-radius:0}
+select{appearance:none;-webkit-appearance:none}
+input:focus,select:focus{border-color:var(--acc)}
+.btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:52px;border:1px solid var(--line2);background:#121a11;color:var(--txt);font:700 17px 'Saira Condensed',sans-serif;letter-spacing:1.5px;cursor:pointer;text-decoration:none;padding:8px 12px}
+.btn svg{flex:none}
+.btn.cta{border:0;background:var(--acc);color:#061006;min-height:60px;font:400 23px 'Saira Stencil One',sans-serif;letter-spacing:2px;clip-path:polygon(12px 0,100% 0,100% calc(100% - 12px),calc(100% - 12px) 100%,0 100%,0 12px)}
+.btn.big{min-height:84px;clip-path:polygon(14px 0,100% 0,100% calc(100% - 14px),calc(100% - 14px) 100%,0 100%,0 14px)}
+.btn.warn{border-color:var(--amber);color:var(--amber);background:transparent;font-weight:800;letter-spacing:2px}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.4}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:6px}
+.sq{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:66px;border:1px solid var(--line2);background:#121a11;color:var(--txt);font:700 13px 'Saira Condensed',sans-serif;letter-spacing:.8px;cursor:pointer}
+.sq.ab{border-color:var(--acc);background:#102910;color:var(--acc)}
+.sq:disabled{opacity:.4}
+.pulse{position:relative;width:40px;height:40px;flex:none}
+.pulse:before{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #061006;animation:pulse 1.8s infinite}
+@keyframes pulse{0%{transform:scale(.6);opacity:.9}100%{transform:scale(1.6);opacity:0}}
+.intel{border:1px solid var(--line);border-left:3px solid var(--amber);background:var(--panel);padding:9px 12px;margin-top:8px}
+.intel .h{display:flex;justify-content:space-between;gap:8px;font:400 11px 'JetBrains Mono',monospace;color:var(--amber);letter-spacing:1px}
+.intel .t{font-size:15px;line-height:1.3;margin-top:4px;color:#D6DFD2;font-weight:600}
+.tag{display:inline-block;font:700 10px 'JetBrains Mono',monospace;padding:1px 5px;border:1px solid var(--g);color:var(--g);margin-left:4px}
+.armed{border:1px solid var(--acc);background:#102910;color:var(--acc);padding:10px 12px;font:700 15px 'Saira Condensed',sans-serif;letter-spacing:1px;display:flex;gap:10px;align-items:center}
+details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-marker{display:none}
+/* Pārklājumi */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(5,8,5,.97);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;overflow:auto}
+.ov .box{width:100%;max-width:460px;display:flex;flex-direction:column;gap:12px}
+.ov video{width:100%;max-width:460px;aspect-ratio:3/4;object-fit:cover;background:#000;border:1px solid var(--line2)}
+.frame{position:relative;width:100%;max-width:460px}
+.frame:after{content:"";position:absolute;inset:18%;border:3px solid var(--g);box-shadow:0 0 0 2000px rgba(0,0,0,.25)}
+.radar{position:relative;width:min(300px,78vw);aspect-ratio:1;border-radius:50%;background:#071207;border:2px solid #2f6b28;box-shadow:0 0 40px rgba(124,255,107,.15) inset;overflow:hidden;margin:0 auto}
+.radar svg{position:absolute;inset:0;width:100%;height:100%}
+.radar .sw{position:absolute;inset:0;border-radius:50%;background:conic-gradient(from 0deg,rgba(124,255,107,0) 0deg,rgba(124,255,107,0) 290deg,rgba(124,255,107,.55) 358deg,rgba(124,255,107,0) 360deg);animation:spin 2.4s linear infinite}
+.radar .rg{position:absolute;inset:0;border-radius:50%;border:2px solid rgba(124,255,107,.6);animation:ring 2.4s ease-out infinite}
+.radar .c{position:absolute;left:50%;top:50%;width:12px;height:12px;margin:-6px;border-radius:50%;background:var(--g);box-shadow:0 0 12px var(--g)}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes ring{0%{transform:scale(.2);opacity:.8}100%{transform:scale(1);opacity:0}}
+.sig{display:flex;align-items:flex-end;gap:4px;height:30px}.sig i{width:7px;background:#2c3d28}
+.prog{height:6px;background:#1a2618;position:relative}.prog i{position:absolute;left:0;top:0;bottom:0;background:var(--g);transition:width .3s linear}
+.stamp{position:relative;width:150px;height:150px;margin:0 auto;animation:pop .6s ease-out both}
+.stamp b{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:400 58px 'Saira Stencil One',sans-serif}
+@keyframes pop{0%{transform:scale(1.6);opacity:0}60%{transform:scale(.95);opacity:1}100%{transform:scale(1)}}
+.newfact{position:relative;border:1px solid var(--g);background:#102910;padding:11px 13px;overflow:hidden}
+.newfact:after{content:"";position:absolute;left:0;right:0;height:2px;background:rgba(124,255,107,.5);animation:scan 2.2s linear infinite}
+@keyframes scan{0%{top:0}100%{top:100%}}
+.newfact .h{font:700 12px 'JetBrains Mono',monospace;color:var(--g);letter-spacing:1.5px}
+.newfact .t{font-size:17px;line-height:1.35;margin-top:4px;color:#E9F7E5}
+.pips{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:4px}.pips i{height:10px;background:#2c3d28}.pips i.on{background:var(--g)}
+.dia{display:inline-block;width:14px;height:14px;transform:rotate(45deg);border:2px solid var(--line2);margin:0 5px}.dia.on{background:var(--acc);border-color:var(--acc)}
+/* Operatori */
+.opgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.opc{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px 10px;background:var(--panel);border:2px solid #24321f;cursor:pointer;color:var(--txt);font:inherit}
+.opc .n{font:400 17px/1 'Saira Stencil One',sans-serif}.opc .r{font:400 10px 'JetBrains Mono',monospace;color:var(--mut)}.opc .a{font-size:12px;font-weight:700;line-height:1.1;text-align:center}
+.hero{display:flex;gap:14px;align-items:center}
+.hero .av{position:relative;width:110px;height:110px;flex:none}
+.hero .av .sw{position:absolute;inset:6px;border-radius:50%;background:conic-gradient(from 0deg,transparent 0deg,transparent 300deg,var(--accsoft) 360deg);animation:spin 3s linear infinite}
+.hero .av svg{position:absolute;inset:0}
+/* Ziņojums */
+.paper{position:relative;background:#E8E1CC;color:#1d1a12;padding:14px;font:400 12.5px/1.45 'JetBrains Mono',monospace}
+.paper .top{display:flex;justify-content:space-between;font-size:10px;letter-spacing:1px;border-bottom:2px solid #1d1a12;padding-bottom:6px}
+.paper .l{margin:5px 0}.paper .x{background:#1d1a12;color:#1d1a12;padding:0 3px;user-select:none}
+.paper .stp{display:inline-block;transform:rotate(-6deg);border:3px solid;padding:4px 10px;font:400 17px 'Saira Stencil One',sans-serif;letter-spacing:1px;margin-top:8px}
+.stp.full{color:#1a7a32}.stp.part{color:#a26b00}.stp.fail{color:#b3261e}
+.qrbox{background:#fff;padding:8px;width:100%;max-width:300px;margin:0 auto}
+.qrbox svg{display:block;width:100%;height:auto}
+/* Karte */
+#mapOv{position:fixed;inset:0;z-index:40;background:#0a0e0a;display:flex;flex-direction:column}
 #mapVp{position:relative;flex:1;overflow:hidden;background:#dfe6d8}
-.mapbar{display:flex;gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 10px 8px;background:#0c100d}
-.mapbar .t{flex:1;font-weight:800;font-size:15px}
+.mapbar{display:flex;gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 10px 8px}
+.mapbar .t{flex:1;font:400 17px 'Saira Stencil One',sans-serif}
 .maptools{position:absolute;right:10px;bottom:calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;z-index:2}
-.maptools button{width:52px;height:52px;border-radius:14px;border:0;background:rgba(12,16,13,.9);color:#fff;font:800 22px system-ui;box-shadow:0 4px 14px #0006}
-.maplegend{position:absolute;left:10px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:2;background:rgba(12,16,13,.88);color:#fff;border-radius:12px;padding:8px 10px;font-size:12px;line-height:1.6}
-.dot{display:inline-block;width:12px;height:12px;border-radius:50%;vertical-align:-1px;margin-right:4px}
-.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.chip{padding:6px 10px;border-radius:999px;font:800 13px system-ui;background:#1d2620;color:#6f7f73;border:1px dashed #3a4a3e}
-.chip.on{background:#1f3a26;color:var(--good);border:1px solid var(--good)}
-.rep{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:14px;background:#e9e3cf;color:#1d1a12;border-radius:10px;padding:14px;line-height:1.5}
-.rep .h{text-align:center;font-weight:900;letter-spacing:2px;border-bottom:2px solid #1d1a12;padding-bottom:6px;margin-bottom:8px}
-.rep .l{margin:7px 0}.rep .l b{display:inline-block;min-width:78px}
-.rep .x{background:#1d1a12;color:#1d1a12;border-radius:3px;padding:0 4px;user-select:none}
-.rep .stamp{display:inline-block;margin-top:8px;border:3px solid;border-radius:6px;padding:4px 10px;font-weight:900;letter-spacing:1px;transform:rotate(-3deg)}
-.rep .stamp.full{color:#1a7a32}.rep .stamp.part{color:#a26b00}.rep .stamp.fail{color:#b3261e}
-.newfact{background:#1f3a26;border:1px solid var(--good);border-radius:10px;padding:8px 10px;margin-top:8px;text-align:left}
-.newfact b{color:var(--good)}
-.tag{display:inline-block;font:800 11px system-ui;padding:2px 6px;border-radius:6px;background:#2b3a2f;color:var(--good);margin-left:4px}
+.maptools button{width:52px;height:52px;border:1px solid var(--line2);background:rgba(10,14,10,.92);color:#fff;font:700 22px system-ui}
+.maplegend{position:absolute;left:10px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:2;background:rgba(10,14,10,.9);color:#fff;padding:8px 10px;font:400 11px/1.7 'JetBrains Mono',monospace}
+.md{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header><img src="CADET_LV_LOGO.png" alt="CADET.LV"><div class="t" id="gameTitle">Misija</div><div class="net" id="net"></div></header>
+  <div class="bar"><span><span class="dot"></span>CADET.LV // <span id="gameTitle">MISIJA</span></span><span id="net"></span></div>
 
-  <!-- 1. Instruktāža -->
-  <section id="vBrief" class="hidden">
-    <div class="card">
-      <h1 id="briefTitle"></h1>
-      <p id="briefText"></p>
-      <p class="mut" id="briefRules"></p>
+  <!-- 1. INSTRUKTĀŽA -->
+  <section id="vBrief" class="hidden" style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel corner">
+      <div class="mono" style="display:flex;justify-content:space-between;font-size:11px;color:var(--amber);letter-spacing:2px"><span>SLEPENI</span><span>INSTRUKTĀŽA</span></div>
+      <div class="st" id="briefTitle" style="font-size:42px;line-height:1;margin:12px 0 6px;color:#F2F6EF"></div>
+      <p id="briefText" style="margin:8px 0 0;font-size:16px;color:#D6DFD2"></p>
     </div>
-    <div class="card">
-      <label for="name">Vārds, uzvārds vai komandas nosaukums</label>
+    <div class="tiles">
+      <div class="tile"><b id="tLaiks">3:00</b><span>LAIKS</span></div>
+      <div class="tile"><b id="tKp">0</b><span>KP</span></div>
+      <div class="tile"><b id="tMax">0</b><span>MAX PUNKTI</span></div>
+    </div>
+    <div class="panel" id="briefFacts">
+      <div class="lbl" style="margin-bottom:8px">Uzdevums: atklāt ienaidnieka plānu</div>
+      <div class="chips" id="briefChips"></div>
+    </div>
+    <p class="mut small" id="briefRules" style="margin:0"></p>
+    <label style="display:flex;flex-direction:column;gap:6px">
+      <span class="lbl">Vārds vai komandas nosaukums</span>
       <input id="name" maxlength="40" autocomplete="off" placeholder="piem. Jānis B. / 2. vads">
-      <div style="height:12px"></div>
-      <button class="btn sec" id="mapBtn1">🗺 Apskatīt karti un plānot maršrutu</button>
-      <div style="height:10px"></div>
-      <button class="btn" id="startBtn">▶ SĀKT MISIJU</button>
-      <p class="mut small" id="offlineNote">Rīks darbojas bez interneta. Neaizver un nedzēs pārlūka datus līdz finišam.</p>
-    </div>
+    </label>
+    <button class="btn" id="mapBtn1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>KARTE UN MARŠRUTA PLĀNS</button>
+    <button class="btn cta" id="startBtn">SĀKT MISIJU</button>
+    <p class="mut small" id="offlineNote" style="margin:0">Rīks darbojas bez interneta. Neaizver un nedzēs pārlūka datus līdz finišam.</p>
   </section>
 
-  <!-- 2. Misija notiek -->
-  <section id="vRun" class="hidden">
-    <div class="card">
-      <div class="mut" style="text-align:center" id="timerLabel">Atlikušais laiks</div>
-      <div class="timer" id="timer">--:--</div>
-      <div class="mut" style="text-align:center" id="lateInfo"></div>
-      <div class="stats">
-        <div class="stat"><b id="sPts">0</b><span>punkti</span></div>
-        <div class="stat"><b id="sKp">0</b><span>KP</span></div>
-        <div class="stat"><b id="sMax">0</b><span>max</span></div>
+  <!-- 1b. OPERATORA IZVĒLE -->
+  <section id="vOps" class="hidden" style="display:flex;flex-direction:column;gap:12px">
+    <div class="st" style="font-size:28px;line-height:1">IZVĒLIES OPERATORU</div>
+    <div class="panel" id="opHeroBox" style="border-color:var(--acc)">
+      <div class="hero">
+        <div class="av"><div class="sw"></div><div id="opHeroAv"></div></div>
+        <div style="flex:1;min-width:0">
+          <div class="mono" id="opHeroRole" style="font-size:11px;letter-spacing:1.5px;color:var(--acc)"></div>
+          <div class="st" id="opHeroName" style="font-size:30px;line-height:1.05;margin-top:2px"></div>
+          <div id="opHeroMotto" style="font-size:14px;line-height:1.25;color:#C3D0BE;margin-top:4px"></div>
+        </div>
       </div>
-      <button class="btn scanbtn" id="gpsBtn" style="background:#4aa3ff;color:#04121f">📡 ESMU PIE KP</button>
-      <button class="btn scanbtn" id="scanBtn">📷 SKENĒT KP</button>
-      <button class="btn sec" id="mapBtn2" style="margin-bottom:10px;font-size:19px;padding:18px">🗺 KARTE</button>
-      <button class="btn sec" id="manualBtn">⌨ Ievadīt kodu ar roku</button>
     </div>
-    <div class="card" id="factCard">
-      <h2>Izlūkošanas ziņojums: <span id="factN">0</span>/<span id="factT">0</span></h2>
-      <div class="chips" id="factChips"></div>
-      <p class="mut small" id="factHint" style="margin:8px 0 0"></p>
+    <div style="border:1px dashed var(--acc);background:#0c120c;padding:10px 12px;display:flex;gap:12px;align-items:center">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none;color:var(--acc)"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="st" id="opHeroAb" style="font-size:18px;color:var(--acc)"></span><span class="mono" id="opHeroUses" style="font-size:12px;color:var(--acc);letter-spacing:1px;white-space:nowrap"></span></div>
+        <div id="opHeroAd" style="font-size:14px;line-height:1.25;color:#D6DFD2"></div>
+      </div>
     </div>
-    <div class="card">
-      <h2>Savāktās izlūkziņas</h2>
-      <div id="intelList" class="mut">Vēl nav neviena. Dodies pie pirmā KP!</div>
-    </div>
-    <button class="btn warn" id="finishBtn">🏁 FINIŠS: esmu štābā</button>
-    <p class="mut small" style="text-align:center" id="whoami"></p>
+    <div class="opgrid" id="opGrid"></div>
+    <button class="btn cta" id="opsStart">GATAVS · SĀKT MISIJU</button>
+    <button class="btn ghost" id="opsBack">ATPAKAĻ</button>
   </section>
 
-  <!-- 3. Finišs -->
-  <section id="vDone" class="hidden">
-    <div class="card" style="text-align:center">
-      <div class="mut">Misija pabeigta</div>
-      <div class="rank" id="dRank"></div>
-      <div style="font:900 54px/1.1 system-ui" id="dTotal"></div>
-      <div class="mut" id="dDetail"></div>
+  <!-- 2. MISIJA -->
+  <section id="vRun" class="hidden" style="display:flex;flex-direction:column;gap:12px">
+    <div id="opChip" style="display:flex;align-items:center;gap:10px">
+      <div id="opChipAv"></div>
+      <div style="line-height:1.05;flex:1;min-width:0">
+        <div class="st" id="opChipName" style="font-size:20px"></div>
+        <div class="mono" id="opChipRole" style="font-size:11px;letter-spacing:1px;color:var(--acc)"></div>
+      </div>
+      <div class="mono small mut" id="whoami" style="text-align:right"></div>
     </div>
-    <div class="card" id="dRepCard">
-      <div class="rep" id="dRep"></div>
+
+    <div class="panel" style="display:flex;align-items:center;gap:14px">
+      <div style="position:relative;width:132px;height:132px;flex:none">
+        <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
+          <circle cx="66" cy="66" r="58" fill="none" stroke="#1d2a1b" stroke-width="10"/>
+          <circle id="ring" cx="66" cy="66" r="58" fill="none" stroke="#7CFF6B" stroke-width="10" stroke-dasharray="364.4" stroke-dashoffset="0" transform="rotate(-90 66 66)"/>
+          <circle cx="66" cy="66" r="46" fill="none" stroke="#2c3d28" stroke-width="1" stroke-dasharray="2 4"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div class="mono" id="timer" style="font-size:24px;font-weight:700;color:#F2F6EF">--:--</div>
+          <div id="timerLabel" style="font-size:12px;letter-spacing:2px;color:var(--mut)">ATLICIS</div>
+        </div>
+      </div>
+      <div style="flex:1;display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #22301f;padding-bottom:5px"><span class="lbl" style="font-size:14px">Punkti</span><span class="mono" id="sPts" style="font-size:24px;font-weight:700;color:var(--g)">0</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid #22301f;padding-bottom:5px"><span class="lbl" style="font-size:14px">KP</span><span class="mono" style="font-size:20px;font-weight:700"><span id="sKp">0</span><span style="color:#6f8a6a">/<span id="sKpT">0</span></span></span></div>
+        <div style="display:flex;justify-content:space-between;align-items:baseline" id="sFactsRow"><span class="lbl" style="font-size:14px">Ziņas</span><span class="mono" style="font-size:20px;font-weight:700;color:var(--amber)"><span id="factN">0</span><span style="color:#8a7346">/<span id="factT">0</span></span></span></div>
+      </div>
     </div>
-    <div class="card" style="text-align:center">
-      <h2>Parādi šo kodu vadītājam</h2>
-      <div class="qr" id="resultQr"></div>
-      <p class="mut small" id="dWho"></p>
+    <div class="mono" id="lateInfo" style="font-size:13px;color:var(--red);text-align:center"></div>
+
+    <div class="panel" id="factCard" style="padding:10px 12px">
+      <div class="lbl" style="font-size:12px;margin-bottom:8px">Ienaidnieka plāns</div>
+      <div class="fgrid" id="factChips"></div>
+      <div class="mut small" id="factHint" style="margin-top:8px"></div>
     </div>
-    <div class="card">
-      <h2>Tavas izlūkziņas</h2>
-      <div id="dIntel"></div>
+
+    <div class="armed hidden" id="armedBox"></div>
+
+    <button class="btn cta big" id="gpsBtn"><span class="pulse"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#061006" stroke-width="2.5" aria-hidden="true"><circle cx="20" cy="20" r="17"/><circle cx="20" cy="20" r="9"/><path d="M20 20L32 8"/><circle cx="20" cy="20" r="2.5" fill="#061006"/></svg></span><span style="display:flex;flex-direction:column;line-height:1;text-align:left"><span style="font-size:28px">ESMU PIE KP</span><span class="mono" style="font-size:11px;font-weight:700;letter-spacing:1px;margin-top:4px">GPS APSTIPRINĀJUMS</span></span></button>
+    <button class="btn cta big hidden" id="scanBigBtn"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><path d="M8 8h3v3H8zM13 13h3v3h-3zM13 8h3M8 13v3"/></svg><span style="font-size:28px">SKENĒT KP</span></button>
+
+    <div class="grid4">
+      <button class="sq" id="mapBtn2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>KARTE</button>
+      <button class="sq" id="scanBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><path d="M8 8h3v3H8zM13 13h3v3h-3zM13 8h3M8 13v3"/></svg>SKENĒT QR</button>
+      <button class="sq" id="manualBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="1"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg>KODS</button>
+      <button class="sq ab" id="abBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>ĪPAŠĪBA<span class="mono" id="abPips" style="font-size:10px;letter-spacing:2px"></span></button>
     </div>
-    <button class="btn sec" id="newBtn">Sākt jaunu misiju šajā telefonā</button>
+
+    <div id="lastIntel"></div>
+    <details class="panel" id="intelDet" style="padding:10px 12px">
+      <summary class="lbl" style="font-size:13px">▸ Visas izlūkziņas (<span id="intelN">0</span>)</summary>
+      <div id="intelList"></div>
+    </details>
+
+    <button class="btn warn" id="finishBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>FINIŠS: ESMU ŠTĀBĀ</button>
+  </section>
+
+  <!-- 3. FINIŠS -->
+  <section id="vDone" class="hidden" style="display:flex;flex-direction:column;gap:12px">
+    <div class="panel" style="display:flex;align-items:center;gap:12px;padding:10px 12px">
+      <div id="dAv"></div>
+      <div style="flex:1;min-width:0">
+        <div class="lbl" id="dWhoTop" style="font-size:12px"></div>
+        <div class="st" id="dRank" style="font-size:24px;line-height:1;color:var(--amber)"></div>
+      </div>
+      <div style="text-align:right"><div class="mono" id="dTotal" style="font-size:34px;font-weight:700;line-height:1;color:var(--g)"></div><div class="lbl" style="font-size:12px">punkti</div></div>
+    </div>
+    <div class="tiles" id="dTiles"></div>
+    <div class="mut small" id="dDetail" style="text-align:center"></div>
+    <div class="paper" id="dRepCard"><div id="dRep"></div></div>
+    <div class="panel" style="text-align:center">
+      <div class="st" style="font-size:20px">NODOD ZIŅOJUMU ŠTĀBAM</div>
+      <div class="mut small" style="margin:4px 0 10px">Parādi šo kodu vadītājam. Nedzēs pārlūka datus, kamēr tas nav noskenēts.</div>
+      <div class="qrbox" id="resultQr"></div>
+      <div class="mono small mut" id="dWho" style="margin-top:8px"></div>
+    </div>
+    <details class="panel" style="padding:10px 12px"><summary class="lbl" style="font-size:13px">▸ Tavas izlūkziņas</summary><div id="dIntel"></div></details>
+    <button class="btn ghost" id="newBtn">Sākt jaunu misiju šajā telefonā</button>
   </section>
 </div>
 
-<!-- Karte -->
+<!-- KARTE -->
 <div id="mapOv" class="hidden">
-  <div class="mapbar"><div class="t" id="mapTitle">Karte</div><button class="btn sec" style="width:auto;padding:10px 14px" id="mapClose">✕ Aizvērt</button></div>
+  <div class="mapbar"><div class="t" id="mapTitle">KARTE</div><button class="btn" style="width:auto;min-height:44px" id="mapClose">✕ AIZVĒRT</button></div>
   <div id="mapVp">
     <div class="maptools">
       <button id="mzIn" aria-label="Tuvināt">+</button>
       <button id="mzOut" aria-label="Attālināt">−</button>
       <button id="mzFit" aria-label="Visa misija" style="font-size:18px">⤢</button>
     </div>
-    <div class="maplegend"><span class="dot" style="background:#fff;border:2px solid #c51fc5"></span>jāapmeklē · <span class="dot" style="background:#5fd07a;border:2px solid #0d5c22"></span>apmeklēts<br><span style="color:#e07ae0">△</span> starts/finišs · <span id="mapCount"></span></div>
+    <div class="maplegend"><span class="md" style="border:2px solid #c51fc5"></span>jāapmeklē · <span class="md" style="background:#5fd07a;border:2px solid #0d5c22"></span>apmeklēts<br><span style="color:#e07ae0">△</span> starts/finišs · <span id="mapCount"></span></div>
   </div>
 </div>
 
-<!-- Skeneris -->
+<!-- QR SKENERIS -->
 <div class="ov hidden" id="scanOv">
   <div class="frame"><video id="video" playsinline muted></video></div>
-  <p class="mut" id="scanMsg">Notēmē kameru uz KP QR kodu</p>
-  <div class="tools"><button class="btn sec" id="scanClose">Aizvērt</button></div>
+  <p class="mut" id="scanMsg" style="text-align:center">Notēmē kameru uz KP QR kodu</p>
+  <div class="box"><button class="btn" id="scanClose">ATCELT</button></div>
 </div>
 
-<!-- GPS pārbaude -->
-<div class="ov hidden" id="gpsOv">
-  <div class="card" style="width:100%;max-width:480px;text-align:center">
-    <div style="font-size:54px">📡</div>
-    <h2 id="gpsTitle">Nosaka atrašanās vietu…</h2>
-    <p class="mut" id="gpsText">Stāvi mierīgi pie KP, ja iespējams, atklātā vietā. Tas var aizņemt līdz 30 sekundēm.</p>
-    <p class="small" id="gpsAcc"></p>
-    <button class="btn sec" id="gpsCancel">Atcelt</button>
-  </div>
-</div>
-
-<!-- Rokas ievade -->
+<!-- ROKAS IEVADE -->
 <div class="ov hidden" id="manOv">
-  <div class="card" style="width:100%;max-width:480px">
-    <h2>Ievadi KP kodu</h2>
-    <p class="mut small">Kods ir uzrakstīts zem QR koda kontrolpunktā.</p>
-    <div class="row">
-      <div><label>KP numurs</label><input id="mKp" inputmode="numeric" maxlength="4" placeholder="31"></div>
-      <div><label>Kods</label><input id="mCode" maxlength="4" placeholder="ABCD" style="text-transform:uppercase"></div>
+  <div class="box panel corner">
+    <div class="st" style="font-size:24px">IEVADI KP KODU</div>
+    <div class="mut small">Kods ir uzrakstīts pie kontrolpunkta vai to tev pateiks vadītājs.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <label><span class="lbl">KP numurs</span><input id="mKp" inputmode="numeric" maxlength="4" placeholder="31"></label>
+      <label><span class="lbl">Kods</span><input id="mCode" maxlength="4" placeholder="ABCD" style="text-transform:uppercase"></label>
     </div>
-    <div style="height:12px"></div>
-    <div class="row"><button class="btn sec" id="mCancel">Atcelt</button><button class="btn" id="mOk">Apstiprināt</button></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><button class="btn" id="mCancel">ATCELT</button><button class="btn cta" id="mOk" style="font-size:19px">APSTIPRINĀT</button></div>
   </div>
 </div>
 
-<!-- Apstiprinājums -->
+<!-- GPS RADARS -->
+<div class="ov hidden" id="gpsOv">
+  <div class="box">
+    <div class="bar"><span>GPS APSTIPRINĀJUMS</span><span style="color:var(--g);animation:blink 1s infinite">● UZTVER</span></div>
+    <div class="st" id="gpsTitle" style="font-size:30px;line-height:1.05;text-align:center">MEKLĒ KONTROLPUNKTU</div>
+    <div class="radar">
+      <svg viewBox="0 0 300 300" aria-hidden="true"><circle cx="150" cy="150" r="112" fill="none" stroke="#1f4a1b"/><circle cx="150" cy="150" r="75" fill="none" stroke="#1f4a1b"/><circle cx="150" cy="150" r="38" fill="none" stroke="#1f4a1b"/><path d="M150 0V300M0 150H300" stroke="#1f4a1b"/><path d="M44 44L256 256M256 44L44 256" stroke="#14301a" stroke-dasharray="3 5"/></svg>
+      <div class="sw"></div><div class="rg"></div><div class="c"></div>
+    </div>
+    <div class="panel" style="display:flex;align-items:center;gap:14px;padding:12px 14px">
+      <div class="sig" id="gpsSig"><i style="height:9px"></i><i style="height:16px"></i><i style="height:23px"></i><i style="height:30px"></i></div>
+      <div style="flex:1"><div class="lbl" style="font-size:13px">Signāla precizitāte</div><div class="mono" id="gpsAcc" style="font-size:22px;font-weight:700">gaida…</div></div>
+    </div>
+    <p class="mut" id="gpsText" style="text-align:center;margin:0">Stāvi mierīgi pie KP, ja iespējams, atklātā vietā. Pārbaude ilgst līdz 30 sekundēm.</p>
+    <div class="prog"><i id="gpsProg" style="width:0%"></i></div>
+    <button class="btn" id="gpsCancel">ATCELT</button>
+  </div>
+</div>
+
+<!-- REZULTĀTS -->
 <div class="ov hidden" id="resOv">
-  <div class="card res" id="resCard" style="width:100%;max-width:480px">
-    <div class="mut" id="resHead"></div>
-    <div class="big" id="resBig"></div>
-    <h2 id="resTitle"></h2>
-    <div class="intel hidden" id="resIntel" style="text-align:left"></div>
-    <div id="resFacts"></div>
-    <div style="height:10px"></div>
-    <button class="btn" id="resOk">Turpināt misiju</button>
+  <div class="box">
+    <div class="bar"><span id="resHead">SAKARI ATJAUNOTI</span><span id="resClock"></span></div>
+    <div class="stamp" id="resStamp">
+      <svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true"><circle cx="75" cy="75" r="68" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="75" cy="75" r="58" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 6"/><path d="M75 0v18M75 132v18M0 75h18M132 75h18" stroke="currentColor" stroke-width="3"/></svg>
+      <b id="resBig"></b>
+    </div>
+    <div class="st" id="resTitle" style="font-size:30px;line-height:1.05;text-align:center"></div>
+    <div class="mono mut" id="resSub" style="font-size:12px;letter-spacing:1px;text-align:center"></div>
+    <div id="resIntel"></div>
+    <div id="resFacts" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button class="btn cta" id="resOk">TURPINĀT MISIJU</button>
+  </div>
+</div>
+
+<!-- ĪPAŠĪBA -->
+<div class="ov hidden" id="abOv">
+  <div class="box">
+    <div class="panel" style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;border-color:var(--acc)">
+      <div id="abAv"></div>
+      <div class="mono mut" id="abWho" style="font-size:11px;letter-spacing:2px"></div>
+      <div class="st" id="abName" style="font-size:30px;line-height:1;color:var(--acc)"></div>
+      <div id="abDesc" style="font-size:16px;color:#D6DFD2"></div>
+      <div id="abDia" style="margin-top:4px"></div>
+      <div class="mono" id="abLeft" style="font-size:12px;color:var(--acc);letter-spacing:1px"></div>
+    </div>
+    <div id="abForm" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div class="panel hidden" id="abRes" style="border-color:var(--acc);background:#0c160c"></div>
+    <button class="btn cta" id="abUse">IZMANTOT</button>
+    <button class="btn" id="abClose">AIZVĒRT</button>
   </div>
 </div>
 
 <script src="jsqr.js"></script>
 <script src="qrcode.js"></script>
 <script src="common.js"></script>
+<script src="ops.js"></script>
 <script src="game.js"></script>
 <script src="map.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-let game=null, st=null, stopScan=null, timerInt=null, busyScan=false;
+let game=null, st=null, stopScan=null, timerInt=null, busyScan=false, pickOp='vanags';
+const ICON_GPS='📡';
 
 const stKey=()=> 'misija_state_'+game.id;
 function save(){localStorage.setItem(stKey(),JSON.stringify(st))}
 function load(){try{return JSON.parse(localStorage.getItem(stKey())||'null')}catch(e){return null}}
+const abilOn=()=>!!game.abil;
+const usesMax=()=>game.uses||3;
+const limitMin=()=>game.min+(st&&st.extra||0);
+const factName=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
+const kpById=id=>game.kp.find(k=>k.id===id);
+
+function setAccent(op){
+  const o=op&&opById(op);
+  document.documentElement.style.setProperty('--acc',o?o.c:'#7CFF6B');
+  document.documentElement.style.setProperty('--accsoft',o?o.soft:'rgba(124,255,107,.35)');
+}
 
 async function init(){
-  // Spēles konfigurācija: no starta saites (#g=...), saglabātā, vai noklusējuma
   const h=location.hash;
   const gm=h.match(/[#&]g=([A-Za-z0-9_-]+)/);
   if(gm){
     try{game=await M.unpack(gm[1]);localStorage.setItem('misija_game',JSON.stringify(game));}
     catch(e){alert('Starta saite ir bojāta. Izmantoju iepriekšējo misiju.');}
   }
-  // Saglabāto misiju (no starta saites) izmantojam tikai, ja tajā jau ir sākta misija;
-  // citādi vienmēr jaunākais noklusējums no game.js
+  // Saglabāto misiju izmantojam tikai, ja tajā jau ir sākta spēle; citādi jaunākais noklusējums
   if(!game){try{const g=JSON.parse(localStorage.getItem('misija_game')||'null');if(g&&localStorage.getItem('misija_state_'+g.id))game=g}catch(e){}}
   if(!game)game=window.MISIJA_DEFAULT;
   st=load();
-  $('gameTitle').textContent=game.title;
+  $('gameTitle').textContent=game.title.toUpperCase();
   const kp=M.parseKp(h);
   if(gm||kp)history.replaceState(null,'',location.pathname);
   render();
-  if(kp)handleKp(kp.id,kp.code); // atvērts ar telefona kameru no KP QR
+  if(kp)handleKp(kp.id,kp.code);
 }
+
+function show(v){['vBrief','vOps','vRun','vDone'].forEach(x=>$(x).classList.toggle('hidden',x!==v))}
 
 function render(){
   clearInterval(timerInt);
-  ['vBrief','vRun','vDone'].forEach(v=>$(v).classList.add('hidden'));
+  setAccent(st&&st.op);
   if(!st||!st.start){
-    $('vBrief').classList.remove('hidden');
-    $('briefTitle').textContent=game.title;
+    show('vBrief');
+    $('briefTitle').textContent=game.title.toUpperCase();
     $('briefText').textContent=game.brief;
-    $('briefRules').textContent=`Laiks: ${game.min} min · kontrolpunkti: ${game.kp.length} · kopā iespējami ${M.maxPoints(game)} punkti · sods: −${game.pen} p. par katru nokavēto minūti`+(game.dq>0?` · kavējot vairāk nekā ${game.dq} min, rezultāts netiek ieskaitīts`:'')+(M.checkMode(game)==='gps'?' · KP atzīmē ar GPS: pie KP spied “📡 Esmu pie KP”':M.checkMode(game)==='both'?' · KP atzīmē, noskenējot QR kodu vai ar GPS (“📡 Esmu pie KP”)':'')+((game.facts||[]).length&&game.bonus?` · par pilnu izlūkošanas ziņojumu (${game.facts.length}/${game.facts.length} ziņas) +${game.bonus} p. bonuss.`:'.');
+    $('tLaiks').textContent=game.min>=60?(Math.floor(game.min/60)+':'+String(game.min%60).padStart(2,'0')):game.min+' min';
+    $('tKp').textContent=game.kp.length; $('tMax').textContent=M.maxPoints(game);
+    const facts=game.facts||[];
+    $('briefFacts').classList.toggle('hidden',!facts.length);
+    $('briefChips').innerHTML=facts.map(f=>`<span class="chip">${M.esc(f.t)}</span>`).join('');
+    const mode=M.checkMode(game);
+    $('briefRules').textContent=`Sods: −${game.pen} p. par katru nokavēto minūti`+(game.dq>0?` · kavējot vairāk nekā ${game.dq} min, rezultāts netiek ieskaitīts`:'')+
+      (mode==='gps'?' · KP atzīmē ar GPS: pie KP spied “Esmu pie KP”':mode==='both'?' · KP atzīmē ar GPS (“Esmu pie KP”) vai noskenējot QR kodu':' · KP atzīmē, noskenējot QR kodu')+
+      (facts.length&&game.bonus?` · pilns izlūkošanas ziņojums: +${game.bonus} p. bonuss`:'')+(abilOn()?` · katram operatoram ir īpašība, ko var izmantot ${usesMax()} reizes`:'')+'.';
+    $('startBtn').textContent=abilOn()?'TĀLĀK: OPERATORS':'SĀKT MISIJU';
     if(st&&st.name)$('name').value=st.name;
   }else if(!st.finish){
-    $('vRun').classList.remove('hidden');
-    $('whoami').textContent=st.name+' · starts '+M.clock(st.start);
-    $('sMax').textContent=M.maxPoints(game);
-    renderIntel($('intelList'));
-    renderFacts();
+    show('vRun');
+    const o=st.op&&opById(st.op);
+    $('opChip').classList.toggle('hidden',!o);
+    if(o){$('opChipAv').innerHTML=avatarSvg(o.k,44);$('opChipName').textContent=st.name.toUpperCase();$('opChipRole').textContent=o.name+' · '+o.role;}
+    $('whoami').innerHTML=(o?'':M.esc(st.name)+'<br>')+'starts '+M.clock(st.start);
+    $('sKpT').textContent=game.kp.length;
     const mode=M.checkMode(game);
     $('gpsBtn').classList.toggle('hidden',mode==='qr');
-    $('scanBtn').classList.toggle('hidden',mode==='gps');
+    $('scanBigBtn').classList.toggle('hidden',mode!=='qr');
+    $('scanBtn').classList.toggle('hidden',mode!=='both');
     $('manualBtn').classList.toggle('hidden',mode==='gps');
+    $('abBtn').classList.toggle('hidden',!o);
+    renderFacts(); renderIntel(); renderArmed(); renderAbBtn();
     tickTimer(); timerInt=setInterval(tickTimer,1000);
   }else{
-    $('vDone').classList.remove('hidden');
-    const sc=M.score(game,st.start,st.finish,st.visits);
-    $('dRank').textContent=sc.dq?'Diskvalificēts':M.rank(game,sc.total);
-    $('dTotal').textContent=sc.total+' p.';
-    $('dDetail').textContent=`${sc.count} KP · ${sc.raw} p.`+(sc.bonus?` + ${sc.bonus} p. bonuss`:'')+(sc.penalty?` − ${sc.penalty} p. sods (kavējums ${sc.overMin} min)`:'')+` · laiks ${M.fmt(sc.usedMs)}`;
-    renderReport(sc);
-    $('resultQr').innerHTML=M.qrSvg(M.encodeResult(game,st),'L');
-    $('dWho').textContent=st.name+' · finišs '+M.clock(st.finish);
-    renderIntel($('dIntel'));
+    show('vDone'); renderDone();
   }
 }
 
-function renderIntel(el){
-  const byId=Object.fromEntries(game.kp.map(k=>[k.id,k]));
-  if(!st.visits.length){el.innerHTML='<span class="mut">Vēl nav neviena. Dodies pie pirmā KP!</span>';return}
-  el.innerHTML=[...st.visits].reverse().map(([id,t,mth])=>{const k=byId[id]||{p:0,m:''};
-    return `<div class="intel"><b>KP ${M.esc(id)} · +${k.p} p.</b>${(k.f||[]).map(f=>`<span class="tag">${M.esc(factName(f))}</span>`).join('')} <span class="mut small">${mth==='g'?'📡 ':''}${M.clock(st.start+t*1000)}</span><div>${M.esc(k.m)}</div></div>`}).join('');
+/* ---------- OPERATORA IZVĒLE ---------- */
+function renderOps(){
+  const o=opById(pickOp)||OPS[0];
+  setAccent(o.k);
+  $('opHeroAv').innerHTML=avatarSvg(o.k,110);
+  $('opHeroRole').textContent=o.role; $('opHeroName').textContent=o.name; $('opHeroMotto').textContent=o.motto;
+  $('opHeroAb').textContent=o.ab; $('opHeroAd').textContent=o.ad; $('opHeroUses').textContent='◆'.repeat(usesMax())+' '+usesMax()+'×';
+  $('opGrid').innerHTML=OPS.map(x=>`<button class="opc" data-k="${x.k}" aria-pressed="${x.k===o.k}" style="${x.k===o.k?`border-color:${x.c};box-shadow:0 0 0 1px ${x.c} inset`:''}">${avatarSvg(x.k,58)}<span class="n">${x.name}</span><span class="r">${x.role}</span><span class="a" style="color:${x.c}">${x.ab}</span></button>`).join('');
 }
-const factName=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
+$('opGrid').addEventListener('click',e=>{const b=e.target.closest('.opc');if(!b)return;pickOp=b.dataset.k;renderOps()});
 
-function renderFacts(){
-  const facts=game.facts||[];
-  $('factCard').classList.toggle('hidden',!facts.length);
-  if(!facts.length)return;
-  const found=M.foundFacts(game,st.visits);
-  $('factN').textContent=found.size; $('factT').textContent=facts.length;
-  $('factChips').innerHTML=facts.map(f=>`<span class="chip${found.has(f.id)?' on':''}">${found.has(f.id)?'✓ ':''}${M.esc(f.t)}</span>`).join('');
-  $('factHint').textContent=found.size===facts.length?(game.bonus?`Ziņojums pilns! +${game.bonus} p. bonuss. Tagad krāj punktus un neaizkavējies.`:'Ziņojums pilns!'):'Meklē trūkstošās ziņas. Dažādi KP atklāj dažādas ziņas.';
+function startMission(op){
+  const name=$('name').value.trim();
+  if(!confirm(`Sākt misiju "${game.title}"? Laiks sāks skaitīties uzreiz.`))return;
+  st={name,start:Date.now(),finish:null,visits:[],op:op||null,extra:0,uses:[],x2:false,obs:false};
+  save(); M.buzz(80); render(); window.scrollTo(0,0);
+  if(M.checkMode(game)!=='qr'&&navigator.geolocation)navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,timeout:15000});
 }
-
-function renderReport(sc){
-  const facts=game.facts||[];
-  $('dRepCard').classList.toggle('hidden',!facts.length);
-  if(!facts.length)return;
-  const oc=M.outcome(game,sc);
-  $('dRep').innerHTML=`<div class="h">IZLŪKOŠANAS ZIŅOJUMS</div>
-    <div class="small">Operācija: ${M.esc(game.title)}<br>Ziņotājs: ${M.esc(st.name)}<br>Noskaidrots: ${sc.facts.size} no ${facts.length}</div>`+
-    facts.map(f=>`<div class="l"><b>${M.esc(f.t)}:</b> ${sc.facts.has(f.id)?M.esc(f.x):'<span class="x">'+'█'.repeat(18)+'</span> <i>nav noskaidrots</i>'}</div>`).join('')+
-    (oc?`<div style="text-align:center"><span class="stamp ${oc.k}">${oc.t}</span></div><p style="margin:10px 0 0">${M.esc(oc.x)}</p>`:'');
-}
-
-function tickTimer(){
-  const left=st.start+game.min*60000-Date.now();
-  const sc=M.score(game,st.start,null,st.visits);
-  $('timer').textContent=M.fmt(left);
-  $('timer').classList.toggle('late',left<0);
-  $('timerLabel').textContent=left<0?'KAVĒJUMS! Steidzies uz štābu':'Atlikušais laiks';
-  $('lateInfo').textContent=left<0?`Sods šobrīd: −${sc.penalty} p.`+(sc.dq?' · rezultāts vairs netiek ieskaitīts':''):'';
-  $('sPts').textContent=sc.raw; $('sKp').textContent=sc.count;
-}
-
 $('startBtn').onclick=()=>{
   const name=$('name').value.trim();
   if(!name){$('name').focus();alert('Ieraksti savu vārdu vai komandas nosaukumu.');return}
-  if(!confirm(`Sākt misiju "${game.title}"? Laiks sāks skaitīties uzreiz.`))return;
-  st={name,start:Date.now(),finish:null,visits:[]}; save(); M.buzz(80); render();
-  // GPS atļauju prasām uzreiz pie starta, kamēr vadītājs ir blakus
-  if(M.checkMode(game)!=='qr'&&navigator.geolocation)navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,timeout:15000});
+  if(abilOn()){show('vOps');renderOps();window.scrollTo(0,0)}else startMission(null);
 };
+$('opsStart').onclick=()=>startMission(pickOp);
+$('opsBack').onclick=()=>{setAccent(null);show('vBrief')};
 
+/* ---------- MISIJAS PANELIS ---------- */
+function renderFacts(){
+  const facts=game.facts||[];
+  $('factCard').classList.toggle('hidden',!facts.length);
+  $('sFactsRow').classList.toggle('hidden',!facts.length);
+  if(!facts.length)return;
+  const found=M.foundFacts(game,st.visits);
+  $('factN').textContent=found.size; $('factT').textContent=facts.length;
+  $('factChips').innerHTML=facts.map(f=>`<span class="${found.has(f.id)?'on':''}">${found.has(f.id)?'✓ ':''}${M.esc(f.t)}</span>`).join('');
+  $('factHint').textContent=found.size===facts.length?(game.bonus?`Ziņojums pilns! +${game.bonus} p. bonuss. Tagad krāj punktus un neaizkavējies.`:'Ziņojums pilns!'):'Dažādi KP atklāj dažādas ziņas.';
+}
+function intelHtml(v){
+  const [id,t,mth]=v, k=kpById(id)||{p:0,m:'',f:[]}, fl=M.vflags(v);
+  const x2=fl.includes('x2'), extra=fl.filter(f=>f.startsWith('o:')).map(f=>f.slice(2));
+  return `<div class="intel"><div class="h"><span>KP ${M.esc(id)} · +${k.p*(x2?2:1)} P.${x2?' (×2)':''}${(k.f||[]).concat(extra).map(f=>`<span class="tag">${M.esc(factName(f))}</span>`).join('')}</span><span style="color:var(--mut)">${mth==='g'?'GPS ':''}${M.clock(st.start+t*1000)}</span></div><div class="t">${M.esc(k.m)}</div></div>`;
+}
+function renderIntel(){
+  const vs=[...st.visits].reverse();
+  $('intelN').textContent=vs.length;
+  $('lastIntel').innerHTML=vs.length?intelHtml(vs[0]).replace('class="intel"','class="intel" style="margin-top:0"'):'<div class="intel" style="margin-top:0"><div class="t mut">Vēl nav nevienas izlūkziņas. Dodies pie pirmā KP!</div></div>';
+  $('intelList').innerHTML=vs.map(intelHtml).join('')+usesLog();
+}
+function usesLog(){
+  if(!st.uses||!st.uses.length)return'';
+  return '<div class="lbl" style="font-size:12px;margin-top:12px">Īpašību žurnāls</div>'+st.uses.map(u=>`<div class="intel" style="border-left-color:var(--acc)"><div class="h" style="color:var(--acc)"><span>${M.esc(u[1])}</span><span style="color:var(--mut)">${M.clock(st.start+u[0]*1000)}</span></div><div class="t">${M.esc(u[2])}</div></div>`).join('');
+}
+function renderArmed(){
+  const a=[];
+  if(st.x2)a.push('PAVĒLE AKTĪVA: nākamais KP dos ×2 punktus');
+  if(st.obs)a.push('NOVĒROŠANA AKTĪVA: nākamais KP atklās vēl vienu ziņu');
+  $('armedBox').classList.toggle('hidden',!a.length);
+  $('armedBox').innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span>'+a.join('<br>')+'</span>';
+}
+const usedCount=()=>(st.uses||[]).length;
+function renderAbBtn(){const left=usesMax()-usedCount();$('abPips').textContent='◆'.repeat(Math.max(0,left))+'◇'.repeat(Math.max(0,usesMax()-Math.max(0,left)))}
+
+function tickTimer(){
+  const total=limitMin()*60000, left=st.start+total-Date.now();
+  const sc=M.score(game,st.start,null,st.visits,st.extra||0);
+  $('timer').textContent=M.fmt(left);
+  $('timer').style.color=left<0?'var(--red)':'#F2F6EF';
+  const frac=Math.max(0,Math.min(1,left/total));
+  $('ring').setAttribute('stroke-dashoffset',(364.4*(1-frac)).toFixed(1));
+  $('ring').setAttribute('stroke',left<0?'#FF5A4E':left<15*60000?'#FFB547':'#7CFF6B');
+  $('timerLabel').textContent=left<0?'KAVĒJUMS':'ATLICIS';
+  $('lateInfo').textContent=left<0?`KAVĒJUMS! Sods šobrīd −${sc.penalty} p.`+(sc.dq?' · rezultāts vairs netiek ieskaitīts':'')+' · steidzies uz štābu':'';
+  $('sPts').textContent=sc.raw; $('sKp').textContent=sc.count;
+}
+
+/* ---------- KP APSTIPRINĀŠANA ---------- */
 function handleKp(id,code){
-  if(!st||!st.start){showRes('err','!','Vispirms sāc misiju','Ieraksti vārdu un spied “Sākt misiju”, tad skenē KP vēlreiz.');return}
-  if(st.finish){showRes('err','!','Misija jau pabeigta','Pēc finiša KP vairs netiek ieskaitīti.');return}
-  if(M.checkMode(game)==='gps'){showRes('err','!','Šajā misijā KP atzīmē ar GPS','Spied “📡 Esmu pie KP”.');return}
-  const k=game.kp.find(x=>x.id===String(id));
-  if(!k||M.kpCode(game.key,k.id)!==String(code).toUpperCase()){M.buzz([60,60,60]);showRes('err','✕','Nederīgs kods','Šis kods nepieder šai misijai. Pārbaudi KP numuru un kodu.');return}
+  if(!st||!st.start){showErr('!','VISPIRMS SĀC MISIJU','Ieraksti vārdu un sāc misiju, tad mēģini vēlreiz.');return}
+  if(st.finish){showErr('!','MISIJA PABEIGTA','Pēc finiša KP vairs netiek ieskaitīti.');return}
+  if(M.checkMode(game)==='gps'){showErr('!','ŠEIT KP ATZĪMĒ AR GPS','Spied “Esmu pie KP”.');return}
+  const k=kpById(String(id));
+  if(!k||M.kpCode(game.key,k.id)!==String(code).toUpperCase()){M.buzz([60,60,60]);showErr('✕','NEDERĪGS KODS','Šis kods nepieder šai misijai. Pārbaudi KP numuru un kodu.');return}
   registerKp(k,'q');
 }
 
 function registerKp(k,method){
-  if(st.visits.some(v=>v[0]===k.id)){M.buzz(120);showRes('dup','✓',`KP ${k.id} jau ieskaitīts`,'Šo punktu tu jau esi apmeklējis.',k);return}
+  if(st.visits.some(v=>v[0]===k.id)){M.buzz(120);showErr('✓',`KP ${k.id} JAU IESKAITĪTS`,'Šo punktu tu jau esi apmeklējis.','dup');return}
   const before=M.foundFacts(game,st.visits);
-  st.visits.push(method==='g'?[k.id,Math.round((Date.now()-st.start)/1000),'g']:[k.id,Math.round((Date.now()-st.start)/1000)]); save(); M.buzz([100,50,200]);
+  const flags=[];
+  if(st.x2){flags.push('x2');st.x2=false}
+  let obsFact=null;
+  if(st.obs){
+    const own=new Set(k.f||[]);
+    const miss=(game.facts||[]).filter(f=>!before.has(f.id)&&!own.has(f.id));
+    if(miss.length){obsFact=miss[Math.floor(Math.random()*miss.length)];flags.push('o:'+obsFact.id)}
+    st.obs=false;
+  }
+  const v=[k.id,Math.round((Date.now()-st.start)/1000),method==='g'?'g':'q'];
+  if(flags.length)v.push(flags.join(','));
+  st.visits.push(v); save(); M.buzz([100,50,200]);
   const after=M.foundFacts(game,st.visits);
+  const pts=k.p*(flags.includes('x2')?2:1);
   const fresh=(game.facts||[]).filter(f=>after.has(f.id)&&!before.has(f.id));
   const known=(k.f||[]).filter(id=>before.has(id));
-  showRes('ok','+'+k.p,`KP ${k.id} apstiprināts!`,'',k);
-  $('resFacts').innerHTML=fresh.map(f=>`<div class="newfact"><b>JAUNA ZIŅA · ${M.esc(f.t)}</b><div>${M.esc(f.x)}</div></div>`).join('')+
-    (known.length&&!fresh.length?`<p class="mut small">Šī ziņa (${known.map(factName).map(M.esc).join(', ')}) jau bija zināma. Punkti tik un tā ieskaitīti.</p>`:'')+
-    ((game.facts||[]).length?`<p class="mut small">Ziņojums: ${after.size}/${game.facts.length}</p>`:'');
+  showRes({kind:'ok',big:'+'+pts,title:`KP ${k.id} APSTIPRINĀTS`,
+    sub:(method==='g'?'APSTIPRINĀTS AR GPS':'APSTIPRINĀTS AR KODU')+(flags.includes('x2')?' · PAVĒLE ×2':'')+` · KOPĀ ${M.score(game,st.start,null,st.visits,st.extra||0).raw} P.`,
+    intel:k,
+    facts:fresh.map(f=>`<div class="newfact"><div class="h">JAUNA ZIŅA · ${M.esc(f.t)}${obsFact&&obsFact.id===f.id?' · NOVĒROŠANA':''}</div><div class="t">${M.esc(f.x)}</div></div>`).join('')+
+      (known.length&&!fresh.length?`<p class="mut small" style="margin:0">Šī ziņa (${known.map(factName).map(M.esc).join(', ')}) jau bija zināma. Punkti tik un tā ieskaitīti.</p>`:'')+
+      ((game.facts||[]).length?`<div class="panel" style="padding:10px 12px"><div style="display:flex;justify-content:space-between" class="lbl"><span style="font-size:12px">Ienaidnieka plāns</span><span class="mono" style="color:var(--amber)">${after.size}/${game.facts.length}</span></div><div class="pips" style="margin-top:8px">${game.facts.map(f=>`<i class="${after.has(f.id)?'on':''}"></i>`).join('')}</div></div>`:'')});
   render();
 }
 
-function showRes(kind,big,title,text,k){
-  $('resFacts').innerHTML='';
-  $('resCard').className='card res '+kind;
-  $('resHead').textContent=kind==='ok'?'Izlūkziņa saņemta':kind==='dup'?'Jau apmeklēts':'Kļūda';
-  $('resBig').textContent=big; $('resTitle').textContent=title;
-  const intel=$('resIntel');
-  if(k&&kind!=='err'){intel.classList.remove('hidden');intel.innerHTML=`<b>Izlūkziņa KP ${M.esc(k.id)}</b><div>${M.esc(k.m)}</div>`}
-  else if(text){intel.classList.remove('hidden');intel.textContent=text}
-  else intel.classList.add('hidden');
+function showErr(big,title,text,kind){showRes({kind:kind||'err',big,title,sub:'',text})}
+function showRes(o){
+  const col=o.kind==='ok'?'var(--g)':o.kind==='dup'?'var(--amber)':'var(--red)';
+  $('resStamp').style.color=col; $('resBig').style.color=col;
+  $('resHead').textContent=o.kind==='ok'?'SAKARI ATJAUNOTI':o.kind==='dup'?'JAU APMEKLĒTS':'KĻŪDA';
+  $('resClock').textContent=M.clock(Date.now());
+  $('resBig').textContent=o.big; $('resTitle').textContent=o.title; $('resSub').textContent=o.sub||'';
+  $('resIntel').innerHTML=o.intel?`<div class="panel" style="padding:12px 14px"><div class="mono" style="font-size:11px;color:var(--amber);letter-spacing:1.5px">IZLŪKZIŅA · ATŠIFRĒTA</div><div style="font-size:16px;margin-top:6px;color:#D6DFD2">${M.esc(o.intel.m)}</div></div>`:
+    o.text?`<p style="margin:0;text-align:center;color:#D6DFD2">${M.esc(o.text)}</p>`:'';
+  $('resFacts').innerHTML=o.facts||'';
+  $('resOk').textContent=o.kind==='ok'?'TURPINĀT MISIJU':'LABI';
   $('resOv').classList.remove('hidden');
 }
 $('resOk').onclick=()=>{$('resOv').classList.add('hidden');busyScan=false};
 
-$('scanBtn').onclick=async()=>{
+/* QR */
+async function openScan(){
   $('scanOv').classList.remove('hidden'); $('scanMsg').textContent='Notēmē kameru uz KP QR kodu';
   try{
     stopScan=await M.startScanner($('video'),text=>{
@@ -362,10 +558,9 @@ $('scanBtn').onclick=async()=>{
       if(!kp){$('scanMsg').textContent='Šis QR nav misijas KP kods';return}
       busyScan=true; closeScan(); handleKp(kp.id,kp.code);
     });
-  }catch(e){
-    $('scanMsg').textContent='Kamera nav pieejama: '+(e.message||e.name)+'. Izmanto “Ievadīt kodu ar roku”.';
-  }
-};
+  }catch(e){$('scanMsg').textContent='Kamera nav pieejama: '+(e.message||e.name)+'. Izmanto “Kods”.'}
+}
+$('scanBtn').onclick=openScan; $('scanBigBtn').onclick=openScan;
 function closeScan(){if(stopScan){stopScan();stopScan=null}$('scanOv').classList.add('hidden')}
 $('scanClose').onclick=closeScan;
 
@@ -373,11 +568,162 @@ $('manualBtn').onclick=()=>{$('mKp').value='';$('mCode').value='';$('manOv').cla
 $('mCancel').onclick=()=>$('manOv').classList.add('hidden');
 $('mOk').onclick=()=>{const id=$('mKp').value.trim(),c=$('mCode').value.trim();if(!id||c.length!==4){alert('Ievadi KP numuru un 4 simbolu kodu.');return}$('manOv').classList.add('hidden');handleKp(id,c)};
 
+/* GPS */
+let gpsWatch=null,gpsTimer=null,gpsTick=null;
+function stopGpsCheck(){if(gpsWatch!=null)navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;clearTimeout(gpsTimer);clearInterval(gpsTick);$('gpsOv').classList.add('hidden')}
+$('gpsCancel').onclick=stopGpsCheck;
+function setSig(acc){
+  const n=acc==null?0:acc<=10?4:acc<=20?3:acc<=40?2:1;
+  [...$('gpsSig').children].forEach((el,i)=>el.style.background=i<n?'var(--g)':'#2c3d28');
+  $('gpsAcc').innerHTML=acc==null?'gaida…':`±${Math.round(acc)} m <span style="font-size:13px;color:${n>=3?'var(--g)':n===2?'var(--amber)':'var(--red)'}">${n>=4?'LIELISKA':n===3?'LABA':n===2?'VIDĒJA':'VĀJA'}</span>`;
+}
+$('gpsBtn').onclick=()=>{
+  if(!navigator.geolocation){alert('Šis telefons neatbalsta GPS pārlūkā.');return}
+  const R=game.radius||30, MAXACC=Math.max(35,R*1.5);
+  const pts=game.kp.map(k=>({k,ll:M.kpLatLng(game,k)})).filter(o=>o.ll);
+  let best=null,started=Date.now(),done=false,soon=null;
+  setSig(null); $('gpsProg').style.width='0%';
+  $('gpsOv').classList.remove('hidden');
+  gpsTick=setInterval(()=>{$('gpsProg').style.width=Math.min(100,(Date.now()-started)/300)+'%'},300);
+  const finish=()=>{
+    if(done)return; done=true; clearTimeout(soon);
+    stopGpsCheck();
+    if(!best){showErr(ICON_GPS,'NAV GPS SIGNĀLA','Pārliecinies, ka telefonā ieslēgta atrašanās vieta un pārlūkam tā atļauta. Pamēģini vēlreiz atklātākā vietā.');return}
+    if(best.acc>MAXACC){showErr(ICON_GPS,'SIGNĀLS PAR VĀJU',`Precizitāte ±${Math.round(best.acc)} m. Pagaidi brīdi atklātākā vietā un mēģini vēlreiz.`);return}
+    let hit=null;
+    for(const o of pts){const d=M.dist(best.lat,best.lng,o.ll[0],o.ll[1]);if(d<=R+Math.min(best.acc,15)&&(!hit||d<hit.d))hit={k:o.k,d}}
+    if(!hit){M.buzz([60,60,60]);showErr('✕','TUVUMĀ NAV KP','Šeit neviens misijas KP netika atrasts. Pārbaudi karti un pieej tuvāk KP vietai.');return}
+    registerKp(hit.k,'g');
+  };
+  gpsWatch=navigator.geolocation.watchPosition(p=>{
+    const c=p.coords;
+    if(!best||c.accuracy<best.acc)best={lat:c.latitude,lng:c.longitude,acc:c.accuracy};
+    setSig(c.accuracy);
+    if(best.acc<=Math.min(20,MAXACC)&&!soon)soon=setTimeout(finish,Math.max(0,3000-(Date.now()-started)));
+  },err=>{
+    if(err.code===1){done=true;stopGpsCheck();showErr(ICON_GPS,'ATRAŠANĀS VIETA NAV ATĻAUTA','Atļauj pārlūkam piekļūt atrašanās vietai (pārlūka iestatījumos) un mēģini vēlreiz.')}
+  },{enableHighAccuracy:true,maximumAge:0,timeout:30000});
+  gpsTimer=setTimeout(finish,30000);
+};
+
+/* ---------- ĪPAŠĪBAS ---------- */
+let abStep=null;
+function kpOptions(filterUnvisited){
+  const vis=new Set(st.visits.map(v=>v[0]));
+  return game.kp.filter(k=>!filterUnvisited||!vis.has(k.id)).map(k=>`<option value="${M.esc(k.id)}">KP ${M.esc(k.id)} · ${k.p} p.${vis.has(k.id)?' · apmeklēts':''}</option>`).join('');
+}
+function openAb(){
+  const o=opById(st.op); if(!o)return;
+  const left=usesMax()-usedCount();
+  $('abAv').innerHTML=avatarSvg(o.k,96);
+  $('abWho').textContent=o.name+' · '+o.role; $('abName').textContent=o.ab; $('abDesc').textContent=o.ad;
+  $('abDia').innerHTML=Array.from({length:usesMax()},(_,i)=>`<span class="dia${i<left?' on':''}"></span>`).join('');
+  $('abLeft').textContent=`ATLIKUŠAS ${left} NO ${usesMax()} REIZĒM`;
+  $('abRes').classList.add('hidden');
+  const f=$('abForm'); f.innerHTML='';
+  let ready=left>0, note='';
+  if(o.k==='vanags')f.innerHTML=`<label><span class="lbl">Kuru KP izlūkot?</span><select id="abA">${kpOptions(true)}</select></label>`;
+  if(o.k==='lusis'){
+    const opts=(game.sf?'<option value="SF">STARTS / FINIŠS</option>':'')+kpOptions(false);
+    f.innerHTML=`<label><span class="lbl">No</span><select id="abA">${opts}</select></label><label><span class="lbl">Līdz</span><select id="abB">${opts}</select></label>`;
+    if($('abB').options.length>1)$('abB').selectedIndex=1;
+  }
+  if(o.k==='bebrs'){
+    const found=M.foundFacts(game,st.visits), miss=(game.facts||[]).filter(x=>!found.has(x.id));
+    if(miss.length)f.innerHTML=`<label><span class="lbl">Kuru ziņu pārtvert?</span><select id="abA">${miss.map(x=>`<option value="${x.id}">${M.esc(x.t)}</option>`).join('')}</select></label>`;
+    else{ready=false;note='Visas ziņas jau ir noskaidrotas.'}
+  }
+  if(o.k==='vilks'&&st.x2){ready=false;note='Pavēle jau ir aktīva nākamajam KP.'}
+  if(o.k==='puce'){
+    if(st.obs){ready=false;note='Novērošana jau ir aktīva nākamajam KP.'}
+    else if(M.foundFacts(game,st.visits).size>=(game.facts||[]).length){ready=false;note='Visas ziņas jau ir noskaidrotas.'}
+  }
+  if(note)f.innerHTML+=`<p class="mut" style="margin:0;text-align:center">${note}</p>`;
+  $('abUse').disabled=!ready;
+  $('abUse').textContent=left>0?`IZMANTOT (${left})`:'ĪPAŠĪBA IZLIETOTA';
+  $('abOv').classList.remove('hidden');
+}
+$('abBtn').onclick=openAb;
+$('abClose').onclick=()=>{$('abOv').classList.add('hidden');render()};
+$('abUse').onclick=()=>{
+  const o=opById(st.op); if(!o||usedCount()>=usesMax())return;
+  let title='',text='';
+  if(o.k==='vanags'){
+    const k=kpById($('abA').value); if(!k)return;
+    const fs=(k.f||[]).map(factName);
+    title=`KP ${k.id} glabā: ${fs.length?fs.join(', '):'ziņu nav'}`;
+    text=`KP ${k.id} dod ${k.p} punktus.`+(fs.length?'':' Šis KP ziņu nesatur, tikai punktus.');
+  }
+  if(o.k==='lusis'){
+    const ll=v=>v==='SF'?M.pxToLatLng(game)(game.sf[0],game.sf[1]):M.kpLatLng(game,kpById(v));
+    const a=$('abA').value,b=$('abB').value;
+    if(a===b){alert('Izvēlies divus dažādus punktus.');return}
+    const A=ll(a),B=ll(b); if(!A||!B){alert('Šim punktam nav koordinātu.');return}
+    const d=M.dist(A[0],A[1],B[0],B[1]);
+    const nm=v=>v==='SF'?'Starts':'KP '+v;
+    title=`${nm(a)} → ${nm(b)}: ${d>=1000?(d/1000).toFixed(1).replace('.',',')+' km':Math.round(d)+' m'}`;
+    text=`Taisnā līnijā. Ejot ~4 km/h, tas ir aptuveni ${Math.max(1,Math.round(d/4000*60))} min, pa takām vairāk.`;
+  }
+  if(o.k==='bebrs'){
+    const fid=$('abA').value, f=(game.facts||[]).find(x=>x.id===fid);
+    const ks=game.kp.filter(k=>(k.f||[]).includes(fid)).map(k=>'KP '+k.id);
+    title=`${f?f.t:fid} atrodams: ${ks.join(', ')||'nekur'}`;
+    text='Pārtverta ienaidnieka rācija. Izvēlies tuvāko KP.';
+  }
+  if(o.k==='vilks'){st.x2=true;title='PAVĒLE AKTĪVA: ×2';text='Nākamais apstiprinātais KP dos dubultus punktus.'}
+  if(o.k==='udris'){st.extra=(st.extra||0)+10;title=`+10 MIN · LAIKS ${M.fmt(st.start+limitMin()*60000-Date.now())}`;text='Misijas laiks pagarināts. Soda minūtes sāksies 10 minūtes vēlāk.'}
+  if(o.k==='puce'){st.obs=true;title='NOVĒROŠANA AKTĪVA';text='Nākamajā KP saņemsi gan tā ziņu, gan vēl vienu, kuras tev trūkst.'}
+  st.uses.push([Math.round((Date.now()-st.start)/1000),o.ab,title+'. '+text]);
+  save(); M.buzz([60,40,60]);
+  $('abRes').innerHTML=`<div class="mono" style="font-size:11px;letter-spacing:1.5px;color:var(--acc)">REZULTĀTS</div><div class="st" style="font-size:21px;line-height:1.15;margin-top:4px">${M.esc(title)}</div><div style="font-size:15px;color:#C3D0BE;margin-top:4px">${M.esc(text)}</div>`;
+  $('abRes').classList.remove('hidden');
+  const left=usesMax()-usedCount();
+  $('abDia').innerHTML=Array.from({length:usesMax()},(_,i)=>`<span class="dia${i<left?' on':''}"></span>`).join('');
+  $('abLeft').textContent=`ATLIKUŠAS ${left} NO ${usesMax()} REIZĒM`;
+  $('abUse').disabled=true; $('abUse').textContent=left>0?'IZMANTOTS ✓':'ĪPAŠĪBA IZLIETOTA';
+  $('abForm').innerHTML='';
+};
+
+/* ---------- FINIŠS ---------- */
+function renderDone(){
+  const sc=M.score(game,st.start,st.finish,st.visits,st.extra||0);
+  const o=st.op&&opById(st.op);
+  $('dAv').innerHTML=o?avatarSvg(o.k,56):'';
+  $('dWhoTop').textContent=(st.name+(o?' · '+o.name:'')+' · pakāpe').toUpperCase();
+  $('dRank').textContent=sc.dq?'DISKVALIFICĒTS':M.rank(game,sc.total).toUpperCase();
+  $('dTotal').textContent=sc.total;
+  $('dTiles').innerHTML=`<div class="tile"><b style="font-size:17px">${sc.raw}</b><span>KP PUNKTI</span></div><div class="tile"><b style="font-size:17px;${sc.bonus?'':'color:#6f8a6a'}">+${sc.bonus}</b><span>BONUSS</span></div><div class="tile"><b style="font-size:17px;${sc.penalty?'color:var(--red)':''}">${sc.penalty?'−'+sc.penalty:M.fmt(sc.usedMs)}</b><span>${sc.penalty?'SODS':'LAIKS'}</span></div>`;
+  $('dDetail').textContent=`${sc.count} KP · laiks ${M.fmt(sc.usedMs)}`+(sc.doubled?` · Pavēle +${sc.doubled} p.`:'')+(st.extra?` · +${st.extra} min`:'')+(sc.penalty?` · kavējums ${sc.overMin} min`:'');
+  const facts=game.facts||[];
+  $('dRepCard').classList.toggle('hidden',!facts.length);
+  if(facts.length){
+    const oc=M.outcome(game,sc);
+    $('dRep').innerHTML=`<div class="top"><span>SLEPENI</span><span>ŠTĀBAM · ${M.esc(game.title.toUpperCase())}</span></div>
+      <div class="st" style="font-size:22px;letter-spacing:1px;text-align:center;margin:8px 0 6px">IZLŪKOŠANAS ZIŅOJUMS</div>
+      <div style="font-size:11px;margin-bottom:6px">Ziņotājs: ${M.esc(st.name)}${o?' ('+o.name+')':''} · Noskaidrots: ${sc.facts.size} no ${facts.length}</div>`+
+      facts.map(f=>`<div class="l"><b>${M.esc(f.t)}:</b> ${sc.facts.has(f.id)?M.esc(f.x):'<span class="x">'+'█'.repeat(14)+'</span> <i>nav noskaidrots</i>'}</div>`).join('')+
+      (oc?`<div style="text-align:center"><span class="stp ${oc.k}">${oc.t}</span></div><p style="margin:10px 0 0;font:600 14px/1.3 'Saira Condensed',sans-serif">${M.esc(oc.x)}</p>`:'');
+  }
+  $('resultQr').innerHTML=M.qrSvg(M.encodeResult(game,st),'L');
+  $('dWho').textContent=st.name+' · finišs '+M.clock(st.finish);
+  $('dIntel').innerHTML=[...st.visits].reverse().map(intelHtml).join('')+usesLog();
+}
+
+$('finishBtn').onclick=()=>{
+  if(!confirm('Vai tiešām esi štābā? Pēc finiša vairs nevarēsi atzīmēt KP.'))return;
+  st.finish=Date.now(); save(); M.buzz([200,100,200]); render(); window.scrollTo(0,0);
+};
+$('newBtn').onclick=()=>{
+  if(!confirm('Vai tiešām dzēst šo rezultātu un sākt no jauna? Pārliecinies, ka vadītājs jau noskenēja tavu kodu.'))return;
+  localStorage.removeItem(stKey()); st=null; render();
+};
+
+/* ---------- KARTE ---------- */
 let mapView=null, mapGameId=null;
 function openMap(){
   if(!game.map){alert('Šai misijai nav pievienota karte.');return}
   $('mapOv').classList.remove('hidden');
-  $('mapTitle').textContent=game.title+' · karte';
+  $('mapTitle').textContent=game.title.toUpperCase()+' · KARTE';
   if(!mapView||mapGameId!==game.id){
     const tools=$('mapVp').querySelector('.maptools'),leg=$('mapVp').querySelector('.maplegend');
     mapView=MisijaMap($('mapVp'),game);mapGameId=game.id;
@@ -391,50 +737,7 @@ $('mapBtn1').onclick=openMap; $('mapBtn2').onclick=openMap;
 $('mapClose').onclick=()=>$('mapOv').classList.add('hidden');
 $('mzIn').onclick=()=>mapView.zoom(1.5); $('mzOut').onclick=()=>mapView.zoom(1/1.5); $('mzFit').onclick=()=>mapView.fit();
 
-let gpsWatch=null,gpsTimer=null;
-function stopGpsCheck(){if(gpsWatch!=null)navigator.geolocation.clearWatch(gpsWatch);gpsWatch=null;clearTimeout(gpsTimer);$('gpsOv').classList.add('hidden')}
-$('gpsCancel').onclick=stopGpsCheck;
-$('gpsBtn').onclick=()=>{
-  if(!navigator.geolocation){alert('Šis telefons neatbalsta GPS pārlūkā.');return}
-  const R=game.radius||30, MAXACC=Math.max(35,R*1.5);
-  const pts=game.kp.map(k=>({k,ll:M.kpLatLng(game,k)})).filter(o=>o.ll);
-  let best=null,started=Date.now(),done=false,soon=null;
-  $('gpsTitle').textContent='Nosaka atrašanās vietu…';$('gpsAcc').textContent='';
-  $('gpsText').textContent='Stāvi mierīgi pie KP, ja iespējams, atklātā vietā. Tas var aizņemt līdz 30 sekundēm.';
-  $('gpsOv').classList.remove('hidden');
-  const finish=()=>{
-    if(done)return; done=true; clearTimeout(soon);
-    stopGpsCheck();
-    if(!best){showRes('err','📡','Nav GPS signāla','Pārliecinies, ka telefonā ieslēgta atrašanās vieta un pārlūkam tā atļauta. Pamēģini vēlreiz atklātākā vietā.');return}
-    if(best.acc>MAXACC){showRes('err','📡','GPS signāls par vāju',`Precizitāte ±${Math.round(best.acc)} m. Pagaidi brīdi atklātākā vietā un mēģini vēlreiz.`);return}
-    // tuvākais KP rādiusā (neizpaužam attālumu)
-    let hit=null;
-    for(const o of pts){const d=M.dist(best.lat,best.lng,o.ll[0],o.ll[1]);if(d<=R+Math.min(best.acc,15)&&(!hit||d<hit.d))hit={k:o.k,d}}
-    if(!hit){M.buzz([60,60,60]);showRes('err','✕','Tuvumā nav misijas KP','Šeit neviens KP netika atrasts. Pārbaudi karti un pieej tuvāk KP vietai.');return}
-    registerKp(hit.k,'g');
-  };
-  gpsWatch=navigator.geolocation.watchPosition(p=>{
-    const c=p.coords;
-    if(!best||c.accuracy<best.acc)best={lat:c.latitude,lng:c.longitude,acc:c.accuracy};
-    $('gpsAcc').textContent=`Precizitāte: ±${Math.round(c.accuracy)} m`;
-    // pietiekami precīzs un pagājušas vismaz 3 s
-    if(best.acc<=Math.min(20,MAXACC)&&!soon)soon=setTimeout(finish,Math.max(0,3000-(Date.now()-started)));
-  },err=>{
-    if(err.code===1){stopGpsCheck();showRes('err','📡','Atrašanās vieta nav atļauta','Atļauj pārlūkam piekļūt atrašanās vietai (pārlūka iestatījumos) un mēģini vēlreiz.')}
-  },{enableHighAccuracy:true,maximumAge:0,timeout:30000});
-  gpsTimer=setTimeout(finish,30000);
-};
-
-$('finishBtn').onclick=()=>{
-  if(!confirm('Vai tiešām esi štābā? Pēc finiša vairs nevarēsi skenēt KP.'))return;
-  st.finish=Date.now(); save(); M.buzz([200,100,200]); render();
-};
-$('newBtn').onclick=()=>{
-  if(!confirm('Vai tiešām dzēst šo rezultātu un sākt no jauna? Pārliecinies, ka vadītājs jau noskenēja tavu kodu.'))return;
-  localStorage.removeItem(stKey()); st=null; render();
-};
-
-function net(){ $('net').textContent=navigator.onLine?'● tiešsaistē':'○ bez interneta' }
+function net(){ $('net').textContent=navigator.onLine?'● TIEŠSAISTĒ':'○ BEZSAISTE' }
 addEventListener('online',net);addEventListener('offline',net);net();
 addEventListener('hashchange',()=>{const kp=M.parseKp(location.hash);if(kp){history.replaceState(null,'',location.pathname);handleKp(kp.id,kp.code)}});
 
