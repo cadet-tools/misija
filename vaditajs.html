@@ -362,6 +362,7 @@ $('csvBtn').onclick=()=>{
 /* ---------- STARTS ---------- */
 let startUrl='';
 async function renderStart(){
+  if(typeof M.gameDiff!=='function'){$('startLink').textContent='Lapa ielādēta no vecas versijas. Pārlādē lapu (vēlreiz, ja vajag).';$('startQr').innerHTML='';return}
   startUrl=base()+'#g='+await M.pack(M.gameDiff(game,window.MISIJA_DEFAULT));
   $('startLink').textContent=startUrl;
   try{$('startQr').innerHTML=M.qrSvg(startUrl,startUrl.length<600?'M':'L')}

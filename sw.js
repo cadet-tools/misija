@@ -31,11 +31,13 @@ self.addEventListener('activate', e => {
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
-  const isPage = req.mode === 'navigate' || /\.html?$/.test(new URL(req.url).pathname) || new URL(req.url).pathname.endsWith('/');
+  // Lapas un kods (html, js, css): ja ir internets, vienmēr jaunākā versija, lai tās nesajaucas savā starpā.
+  // Lielie faili (karte, fonti, ikonas): no kešatmiņas uzreiz.
+  const path = new URL(req.url).pathname;
+  const isPage = req.mode === 'navigate' || path.endsWith('/') || /\.(html?|js|css|webmanifest)$/.test(path);
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
     if (isPage) {
-      // Lapas: ja ir internets, jaunākā (max 3 s); citādi saglabātā
       try {
         const res = await Promise.race([fetch(req, { cache: 'no-cache' }), new Promise((_, rej) => setTimeout(() => rej(new Error('t')), 3000))]);
         if (res && res.ok) { cache.put(req, res.clone()); return res; }
