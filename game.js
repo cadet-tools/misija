@@ -9,7 +9,7 @@ const XY = {"21":[1502.0,1124.0],"23":[1575.0,297.0],"31":[992.0,836.0],"32":[81
 const LEG = {"23": {"o": "Taku krustojums “+ / X” veida","v": "Krustojuma centrs","l": "Meklē vietu, kur divas takas krustojas “+” vai “X” veidā."},"31": {"o": "Grāvja DA stūris","v": "Dienvidaustrumu stūris","l": "Meklē kartē norādīto grāvi un nosaki tā dienvidaustrumu stūri."},"32": {"o": "Taku krustojums “+ / X” veida","v": "Krustojuma centrs","l": "Meklē vietu, kur divas takas krustojas “+” vai “X” veidā."},"35": {"o": "Paugurs","v": "LOF apļa centrs","l": "Meklē kartē norādīto pauguru."},"42": {"o": "Ēka","v": "LOF apļa centrs","l": "Meklē kartē norādīto ēku."},"43": {"o": "Taku atzars “Y” krustojums","v": "“Y” atzara centrs","l": "Meklē vietu, kur taka sadalās vai pievienojas citai takai “Y” veidā."},"44": {"o": "Grāvis","v": "LOF apļa centrs","l": "Meklē kartē norādīto grāvi."},"47": {"o": "Taku atzars “Y” krustojums","v": "“Y” atzara centrs","l": "Meklē vietu, kur taka sadalās vai pievienojas citai takai “Y” veidā."},"50": {"o": "Paugurs","v": "LOF apļa centrs","l": "Meklē kartē norādīto pauguru."},"51": {"o": "Taku atzars “Y” krustojums","v": "“Y” atzara centrs","l": "Meklē vietu, kur taka sadalās vai pievienojas citai takai “Y” veidā."},"52": {"o": "Taku atzars “Y” krustojums","v": "“Y” atzara centrs","l": "Meklē vietu, kur taka sadalās vai pievienojas citai takai “Y” veidā."},"55": {"o": "Takas R galā","v": "Rietumu gals","l": "Meklē kartē norādītās takas rietumu galu."},"83": {"o": "Paugurs","v": "LOF apļa centrs","l": "Meklē kartē norādīto pauguru."},"92": {"o": "Paugurs","v": "LOF apļa centrs","l": "Meklē kartē norādīto pauguru."}};
 
 window.MISIJA_DEFAULT = {
-  v: 6,
+  v: 7,
   id: 'op-vejs',
   key: 'vejs-2026-cadet',
   title: 'Operācija VĒJŠ',
@@ -24,6 +24,8 @@ window.MISIJA_DEFAULT = {
   // KP apstiprināšana: 'qr' (tikai QR kods), 'gps' (tikai GPS), 'both' (QR vai GPS)
   check: 'both',
   // Operatori ar īpašībām (katram 'uses' reizes)
+  // Instruktora tālrunis (poga "Zvanīt instruktoram")
+  phone: '+371 244866351',
   abil: true,
   uses: 3,
   radius: 30,

@@ -124,6 +124,8 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 .gl .ic{width:46px;height:46px;flex:none;border:1px solid var(--line2);background:#fff;display:flex;align-items:center;justify-content:center}
 .gl b{display:block;font-size:16px}.gl span{font-size:14px;color:#C3D0BE}
 .sw{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:6px;border:1px solid #556}
+.call{display:flex;align-items:center;justify-content:center;gap:10px;min-height:52px;border:2px solid #FF5A4E;background:#2a0f0d;color:#FFB3AB;text-decoration:none;font:700 16px 'Saira Condensed',sans-serif;letter-spacing:1.5px;padding:6px 12px;text-align:center}
+.call b{font:700 17px 'JetBrains Mono',monospace;color:#fff;letter-spacing:.5px}
 .md{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:4px}
 </style>
 </head>
@@ -155,6 +157,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
     <button class="btn" id="mapBtn1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>KARTE UN MARŠRUTA PLĀNS</button>
     <button class="btn" id="legBtn1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>KP LEĢENDAS UN APZĪMĒJUMI</button>
     <button class="btn cta" id="startBtn" data-sfx="none">SĀKT MISIJU</button>
+    <a class="call callBtn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg><span>ZVANĪT INSTRUKTORAM <b class="callNum"></b></span></a>
     <p class="mut small" id="offlineNote" style="margin:0">Rīks darbojas bez interneta. Neaizver un nedzēs pārlūka datus līdz finišam.</p>
   </section>
 
@@ -194,6 +197,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <div class="mono small mut" id="whoami" style="text-align:right"></div>
     </div>
 
+    <a class="call callBtn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg><span>ZVANĪT INSTRUKTORAM <b class="callNum"></b></span></a>
     <div class="panel" style="display:flex;align-items:center;gap:14px">
       <div style="position:relative;width:132px;height:132px;flex:none">
         <svg width="132" height="132" viewBox="0 0 132 132" aria-hidden="true">
@@ -262,6 +266,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <div class="mono small mut" id="dWho" style="margin-top:8px"></div>
     </div>
     <details class="panel" style="padding:10px 12px"><summary class="lbl" style="font-size:13px">▸ Tavas izlūkziņas</summary><div id="dIntel"></div></details>
+    <a class="call callBtn" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg><span>ZVANĪT INSTRUKTORAM <b class="callNum"></b></span></a>
     <button class="btn ghost" id="newBtn">Sākt jaunu misiju šajā telefonā</button>
   </section>
 </div>
@@ -342,6 +347,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
     <div class="mono mut" id="resSub" style="font-size:12px;letter-spacing:1px;text-align:center"></div>
     <div id="resIntel"></div>
     <div id="resFacts" style="display:flex;flex-direction:column;gap:10px"></div>
+    <a class="call callBtn hidden" id="resCall" href="#"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg><span>ZVANĪT INSTRUKTORAM <b class="callNum"></b></span></a>
     <button class="btn cta" id="resOk">TURPINĀT MISIJU</button>
   </div>
 </div>
@@ -409,10 +415,16 @@ async function init(){
   if(kp)handleKp(kp.id,kp.code);
 }
 
+function renderCall(){
+  const ph=(game.phone||'').trim(), tel=ph.replace(/[^+\d]/g,'');
+  document.querySelectorAll('.callBtn').forEach(a=>{a.href='tel:'+tel;if(!ph)a.classList.add('hidden');else if(a.id!=='resCall')a.classList.remove('hidden')});
+  document.querySelectorAll('.callNum').forEach(b=>b.textContent=ph);
+}
 function show(v){['vBrief','vOps','vRun','vDone'].forEach(x=>$(x).classList.toggle('hidden',x!==v))}
 
 function render(){
   clearInterval(timerInt);
+  renderCall();
   setAccent(st&&st.op);
   if(!st||!st.start){
     show('vBrief');
@@ -578,6 +590,7 @@ function showRes(o){
     o.text?`<p style="margin:0;text-align:center;color:#D6DFD2">${M.esc(o.text)}</p>`:'';
   $('resFacts').innerHTML=o.facts||'';
   $('resOk').textContent=o.kind==='ok'?'TURPINĀT MISIJU':'LABI';
+  $('resCall').classList.toggle('hidden',o.kind!=='err'||!game.phone);
   $('resOv').classList.remove('hidden');
 }
 $('resOk').onclick=()=>{$('resOv').classList.add('hidden');busyScan=false};
@@ -848,7 +861,7 @@ $('mzIn').onclick=()=>mapView.zoom(1.5); $('mzOut').onclick=()=>mapView.zoom(1/1
 
 // Visām pogām klikšķis (izņemot tās, kurām ir sava skaņa)
 document.addEventListener('click',e=>{const b=e.target.closest('button,a.btn');if(!b||b.dataset.sfx==='none'||b.disabled)return;SFX.play('click')},true);
-function renderMute(){$('muteBtn').textContent=SFX.muted?'SKAŅA: IZSL.':'SKAŅA: IESL.'}
+function renderMute(){$('muteBtn').textContent=SFX.muted?'SKAŅA ✕':'SKAŅA ✓'}
 $('muteBtn').onclick=()=>{SFX.setMuted(!SFX.muted);renderMute();SFX.play('click')};
 renderMute();
 
