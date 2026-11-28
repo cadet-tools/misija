@@ -921,6 +921,47 @@ async function offlineCheck(){
   poll();
 }
 offlineCheck();
+
+/* ---------- AUTOMĀTISKA ATJAUNINĀŠANA ----------
+   Ja ir internets un serverī ir jaunāka versija, lapa pārlādējas pati.
+   Distances dati (vārds, starts, KP, punkti, īpašības) glabājas telefonā un saglabājas.
+   Pārlāde notiek tikai tad, kad nav atvērts neviens logs (GPS pārbaude, skeneris u.c.). */
+let reloadPending=false, reloading=false;
+function busyNow(){return [...document.querySelectorAll('.ov,#mapOv')].some(el=>!el.classList.contains('hidden'))}
+function safeReload(){
+  if(reloading)return; reloadPending=true;
+  if(busyNow())return; // mēģinās vēlreiz pēc brīža
+  reloading=true;
+  try{if(st)save();sessionStorage.setItem('misija_updated','1')}catch(e){}
+  location.replace(location.pathname);
+}
+setInterval(()=>{if(reloadPending)safeReload()},2000);
+if('serviceWorker' in navigator){
+  let hadCtl=!!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(hadCtl)safeReload();hadCtl=true});
+}
+async function checkUpdate(){
+  if(!navigator.onLine||reloading)return;
+  try{
+    const r=await fetch('assets.js?u='+Date.now(),{cache:'no-store'});
+    if(!r.ok)return;
+    const m=(await r.text()).match(/MISIJA_CACHE\s*=\s*'([^']+)'/);
+    if(m&&m[1]!==self.MISIJA_CACHE){
+      const reg=await navigator.serviceWorker?.getRegistration();
+      try{await reg?.update()}catch(e){}
+      // ja jaunā versija nepārņem lapu 10 s laikā, pārlādējam tik un tā
+      setTimeout(safeReload,10000);
+    }
+  }catch(e){}
+}
+addEventListener('online',()=>setTimeout(checkUpdate,1500));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate()});
+setInterval(checkUpdate,60000);
+setTimeout(checkUpdate,5000);
+try{if(sessionStorage.getItem('misija_updated')){sessionStorage.removeItem('misija_updated');
+  const t=document.createElement('div');t.textContent='✓ RĪKS ATJAUNINĀTS · DISTANCES DATI SAGLABĀTI';
+  t.style.cssText="position:fixed;left:50%;top:calc(10px + env(safe-area-inset-top));transform:translateX(-50%);z-index:99;background:#102910;border:1px solid #7CFF6B;color:#7CFF6B;padding:10px 14px;font:700 13px 'JetBrains Mono',monospace;letter-spacing:1px;text-align:center;max-width:92vw";
+  document.body.appendChild(t);setTimeout(()=>t.remove(),5000)}}catch(e){}
 init();
 </script>
 </body>
