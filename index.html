@@ -106,7 +106,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 #mapOv{position:fixed;inset:0;z-index:40;background:#0a0e0a;display:flex;flex-direction:column}
 #mapVp{position:relative;flex:1;overflow:hidden;background:#dfe6d8}
 .mapbar{display:flex;gap:8px;align-items:center;padding:calc(8px + env(safe-area-inset-top)) 10px 8px}
-.mapbar .t{flex:1;font:400 17px 'Saira Stencil One',sans-serif}
+.mapbar .t{flex:1;min-width:0;font:400 17px 'Saira Stencil One',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .maptools{position:absolute;right:10px;bottom:calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;z-index:2}
 .maptools button{width:52px;height:52px;border:1px solid var(--line2);background:rgba(10,14,10,.92);color:#fff;font:700 22px system-ui}
 .maplegend{position:absolute;left:10px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:2;background:rgba(10,14,10,.9);color:#fff;padding:8px 10px;font:400 11px/1.7 'JetBrains Mono',monospace}
@@ -268,7 +268,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 
 <!-- KARTE -->
 <div id="mapOv" class="hidden">
-  <div class="mapbar"><div class="t" id="mapTitle">KARTE</div><button class="btn" style="width:auto;min-height:44px" id="mapClose">✕ AIZVĒRT</button></div>
+  <div class="mapbar"><div class="t" id="mapTitle">KARTE</div><button class="btn" style="width:auto;min-height:44px" id="legBtn3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>LEĢENDA</button><button class="btn" style="width:auto;min-height:44px" id="mapClose">✕ AIZVĒRT</button></div>
   <div id="mapVp">
     <div class="maptools">
       <button id="mzIn" aria-label="Tuvināt">+</button>
@@ -813,7 +813,7 @@ function openLeg(tab){
 }
 function setLegTab(n){$('legTab1').classList.toggle('on',n===1);$('legTab2').classList.toggle('on',n===2);$('legList').classList.toggle('hidden',n!==1);$('legGloss').classList.toggle('hidden',n!==2)}
 $('legTab1').onclick=()=>setLegTab(1); $('legTab2').onclick=()=>setLegTab(2);
-$('legBtn1').onclick=()=>openLeg(1); $('legBtn2').onclick=()=>openLeg(1);
+$('legBtn1').onclick=()=>openLeg(1); $('legBtn2').onclick=()=>openLeg(1); $('legBtn3').onclick=()=>openLeg(1);
 $('legClose').onclick=()=>$('legOv').classList.add('hidden');
 $('legList').addEventListener('click',e=>{const b=e.target.closest('[data-map]');if(!b)return;const k=kpById(b.dataset.map);$('legOv').classList.add('hidden');openMap(k)});
 
@@ -822,7 +822,7 @@ let mapView=null, mapGameId=null;
 function openMap(focusKp){
   if(!game.map){alert('Šai misijai nav pievienota karte.');return}
   $('mapOv').classList.remove('hidden');
-  $('mapTitle').textContent=game.title.toUpperCase()+' · KARTE';
+  $('mapTitle').textContent='KARTE';
   if(!mapView||mapGameId!==game.id){
     const tools=$('mapVp').querySelector('.maptools'),leg=$('mapVp').querySelector('.maplegend');
     mapView=MisijaMap($('mapVp'),game);mapGameId=game.id;

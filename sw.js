@@ -1,5 +1,5 @@
 // Misija — bezsaistes darbība. Mainot failus, palielini versiju.
-const CACHE = 'misija-v10';
+const CACHE = 'misija-v11';
 const FILES = [
   './', './index.html', './vaditajs.html', './common.js', './ops.js', './game.js', './map.js', './fonts/fonts.css',
   './fonts/saira-stencil-one-latin-400-normal.woff2', './fonts/saira-stencil-one-latin-ext-400-normal.woff2',
