@@ -233,5 +233,22 @@
     return g;
   };
 
+  // Štāba uzdevumu atbilžu pārbaude (kopīga lapai un uzdevumu sagatavošanai)
+  M.taskNorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+  M.taskNum = s => { const m = String(s || '').replace(',', '.').match(/-?\d+(\.\d+)?/); return m ? Number(m[0]) : NaN; };
+  M.taskHash = (id, v) => M.cyrb53('misija-task|' + id + '|' + v).toString(36);
+  // Atgriež {ok, bad:'kļūdas teksts ievadei'}
+  M.taskCheck = (t, input) => {
+    const hs = [].concat(t.h || []);
+    if (t.type === 'text') {
+      const v = M.taskNorm(input); if (!v) return { bad: 'Ieraksti atbildi.' };
+      return { ok: hs.includes(M.taskHash(t.id, v)) };
+    }
+    if (t.num && !/^\s*\d+\s*$/.test(String(input || ''))) return { bad: 'Ieraksti tikai skaitli.' };
+    const n = M.taskNum(input); if (isNaN(n)) return { bad: 'Ieraksti skaitli.' };
+    if (t.type === 'range') { const [lo, hi] = atob(t.r).split('|').map(Number); return { ok: n >= lo - 1e-9 && n <= hi + 1e-9 }; }
+    return { ok: hs.includes(M.taskHash(t.id, String(n))) };
+  };
+
   window.M = M;
 })();

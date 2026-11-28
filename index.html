@@ -251,6 +251,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <button class="sq ab" id="abBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>ĪPAŠĪBA<span class="mono" id="abPips" style="font-size:10px;letter-spacing:2px"></span></button>
     </div>
 
+    <button class="btn hidden" id="taskListBtn" style="border-color:var(--amber);color:var(--amber);background:#1d1608"></button>
     <div id="lastIntel"></div>
     <details class="panel" id="intelDet" style="padding:10px 12px">
       <summary class="lbl" style="font-size:13px">▸ Visas izlūkziņas (<span id="intelN">0</span>)</summary>
@@ -377,9 +378,21 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <div class="mut small" id="taskHint"></div>
       <input id="taskA" autocomplete="off" style="margin-top:10px;font-size:22px;text-align:center">
       <div class="mono small" id="taskMsg" style="margin-top:8px;min-height:18px;text-align:center"></div>
+      <div class="mut small" id="taskMore" style="margin-top:8px;text-align:center"></div>
     </div>
     <button class="btn cta" id="taskOk" data-sfx="none">ATBILDĒT</button>
     <button class="btn" id="taskLater">ATLIKT UZ VĒLĀKU</button>
+  </div>
+</div>
+
+<!-- UZDEVUMU SARAKSTS -->
+<div class="ov hidden" id="taskListOv" style="justify-content:flex-start;background:#0a0e0a">
+  <div class="box">
+    <div class="bar"><span style="color:var(--amber)">● ŠTĀBA UZDEVUMI</span><span id="tlCount"></span></div>
+    <div class="st" style="font-size:28px;line-height:1;color:var(--amber)">PAPILDINĀT ĪPAŠĪBU</div>
+    <div class="mut small">Par katru pareizu atbildi: +1 īpašības reize. Uzmanīgi: daudziem uzdevumiem ir tikai viens mēģinājums.</div>
+    <div id="tlList" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button class="btn" id="tlClose">AIZVĒRT</button>
   </div>
 </div>
 
@@ -494,7 +507,7 @@ function render(){
     $('scanBtn').classList.toggle('hidden',mode!=='both');
     $('manualBtn').classList.toggle('hidden',mode==='gps');
     $('abBtn').classList.toggle('hidden',!o);
-    renderFacts(); renderIntel(); renderArmed(); renderAbBtn();
+    renderFacts(); renderIntel(); renderArmed(); renderAbBtn(); renderTaskBtn();
     tickTimer(); timerInt=setInterval(tickTimer,1000);
   }else{
     show('vDone'); renderDone();
@@ -711,7 +724,7 @@ function openAb(){
   $('abLeft').textContent=`ATLIKUŠAS ${left} NO ${usesMax()} REIZĒM`;
   $('abRes').classList.add('hidden');
   const pt=pendingTasks();
-  $('abTasks').innerHTML=pt.length?`<div class="task" style="padding:12px"><div class="mono" style="font-size:11px;color:var(--amber);letter-spacing:1.5px">PAPILDINĀT ĪPAŠĪBU · ${pt.length} UZDEVUM${pt.length===1?'S':'I'}</div><div style="font-size:15px;color:#FFF3DC;margin:4px 0 8px">Izpildi štāba uzdevumu un saņem +1 reizi.</div>${pt.map(t=>`<button class="btn" data-task="${t.id}" style="border-color:var(--amber);color:var(--amber);min-height:44px;margin-top:6px">PAPILDINĀT: ${M.esc(t.q.length>34?t.q.slice(0,34)+'…':t.q)}</button>`).join('')}</div>`:'';
+  $('abTasks').innerHTML=TASKS().length?`<button class="btn" data-tasklist="1" style="border-color:var(--amber);color:var(--amber);background:#1d1608">+ PAPILDINĀT ĪPAŠĪBU${pt.length?` (${pt.length} uzdevum${pt.length===1?'s':'i'})`:' · uzdevumu nav'}</button>`:'';
   const f=$('abForm'); f.innerHTML='';
   let ready=left>0, note='';
   if(o.k==='vanags')f.innerHTML=`<label><span class="lbl">Kuru KP izlūkot?</span><select id="abA">${kpOptions(true)}</select></label>`;
@@ -736,7 +749,7 @@ function openAb(){
   $('abOv').classList.remove('hidden');
 }
 $('abBtn').onclick=()=>{openAb();SFX.play('soft')};
-$('abTasks').addEventListener('click',e=>{const b=e.target.closest('[data-task]');if(!b)return;$('abOv').classList.add('hidden');openTask(b.dataset.task)});
+$('abTasks').addEventListener('click',e=>{const b=e.target.closest('[data-tasklist]');if(!b)return;$('abOv').classList.add('hidden');openTaskList()});
 $('abClose').onclick=()=>{$('abOv').classList.add('hidden');render()};
 $('abUse').onclick=()=>{
   const o=opById(st.op); if(!o||usedCount()>=usesMax())return;
@@ -779,46 +792,73 @@ $('abUse').onclick=()=>{
 
 /* ---------- ŠTĀBA UZDEVUMI ---------- */
 let curTask=null;
-const normAns=s=>String(s||'').toLowerCase().replace(/\s+/g,'');
-function openTask(id){
+function taskStatus(t){const x=taskSt(t.id);if(x.ok)return 'ok';if((x.fails||0)>=(t.tries||3))return 'fail';return 'open'}
+function renderTaskBtn(){
+  const b=$('taskListBtn'); const has=TASKS().length&&st&&st.op;
+  b.classList.toggle('hidden',!has); if(!has)return;
+  const n=pendingTasks().length;
+  b.innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>PAPILDINĀT ĪPAŠĪBU${n?` <span class="badge">${n}</span>`:' · visi uzdevumi atbildēti'}`;
+}
+function openTaskList(){
+  const ts=TASKS();
+  $('tlCount').textContent=`${ts.filter(t=>taskStatus(t)==='ok').length}/${ts.length} PAREIZI`;
+  $('tlList').innerHTML=ts.map((t,i)=>{const stt=taskStatus(t),x=taskSt(t.id),left=(t.tries||3)-(x.fails||0);
+    return `<div class="task" style="padding:12px;${stt==='ok'?'border-color:var(--g);background:#0f1d0e':stt==='fail'?'border-color:#5a2a26;background:#170d0c;opacity:.75':''}">
+      <div style="display:flex;justify-content:space-between;gap:8px" class="mono small"><span style="color:${stt==='ok'?'var(--g)':stt==='fail'?'var(--red)':'var(--amber)'}">UZDEVUMS ${i+1} · ${stt==='ok'?'✓ PAREIZI +1':stt==='fail'?'✕ NEPAREIZI':left===1?'1 MĒĢINĀJUMS':left+' MĒĢINĀJUMI'}</span></div>
+      <div style="font-size:17px;font-weight:700;color:#FFF3DC;margin-top:4px">${M.esc(t.q)}</div>
+      ${stt==='ok'&&t.show?`<div class="mono small" style="color:var(--g);margin-top:4px">Atbilde: ${M.esc(t.show)}</div>`:''}
+      ${stt==='open'?`<button class="btn cta" data-task="${t.id}" style="margin-top:8px;min-height:48px;font-size:18px;background:var(--amber)">ATBILDĒT</button>`:''}
+    </div>`}).join('');
+  $('taskListOv').classList.remove('hidden'); $('taskListOv').scrollTop=0;
+}
+$('tlList').addEventListener('click',e=>{const b=e.target.closest('[data-task]');if(!b)return;$('taskListOv').classList.add('hidden');openTask(b.dataset.task)});
+$('tlClose').onclick=()=>{$('taskListOv').classList.add('hidden');render()};
+$('taskListBtn').onclick=openTaskList;
+
+function openTask(id,more){
   const t=TASKS().find(x=>x.id===id); if(!t)return;
   curTask=t; st.tasks=st.tasks||{}; st.tasks[id]=Object.assign({},st.tasks[id],{seen:1}); save();
-  const s=taskSt(id), left=(t.tries||3)-(s.fails||0);
-  $('taskNo').textContent=`MĒĢINĀJUMI: ${left}`;
+  const x=taskSt(id), left=(t.tries||3)-(x.fails||0);
+  $('taskNo').textContent=left===1?'TIKAI 1 MĒĢINĀJUMS':`MĒĢINĀJUMI: ${left}`;
   $('taskQ').textContent=t.q; $('taskHint').textContent=t.hint||'';
-  $('taskA').value=''; $('taskA').inputMode=t.num?'numeric':'text';
+  $('taskA').value=''; $('taskA').inputMode=t.type==='text'?'text':'decimal';
   $('taskMsg').textContent=''; $('taskOk').disabled=false; $('taskOk').textContent='ATBILDĒT';
+  $('taskMore').textContent=more?`+ vēl ${more} uzdevum${more===1?'s':'i'}: poga “PAPILDINĀT ĪPAŠĪBU” misijas panelī.`:'';
   $('taskLater').textContent='ATLIKT UZ VĒLĀKU';
   $('taskOv').classList.remove('hidden'); setTimeout(()=>$('taskA').focus(),200);
 }
 $('taskLater').onclick=()=>{$('taskOv').classList.add('hidden');curTask=null;render()};
 $('taskOk').onclick=()=>{
-  const t=curTask; if(!t)return;
-  const a=normAns($('taskA').value);
-  if(!a){$('taskMsg').style.color='var(--amber)';$('taskMsg').textContent='Ieraksti atbildi.';return}
-  if(t.num&&!/^\d+$/.test(a)){$('taskMsg').style.color='var(--amber)';$('taskMsg').textContent='Ieraksti tikai skaitli.';return}
-  const s=Object.assign({},taskSt(t.id));
-  if(M.cyrb53('misija-task|'+t.id+'|'+a).toString(36)===t.h){
-    s.ok=1; s.t=Math.round((Date.now()-st.start)/1000); st.tasks[t.id]=s; save();
+  const t=curTask; if(!t||taskStatus(t)!=='open')return;
+  const r=M.taskCheck(t,$('taskA').value);
+  if(r.bad){$('taskMsg').style.color='var(--amber)';$('taskMsg').textContent=r.bad;return}
+  const x=Object.assign({},taskSt(t.id));
+  if(r.ok){
+    x.ok=1; x.t=Math.round((Date.now()-st.start)/1000); st.tasks[t.id]=x; save();
     SFX.play('success'); setTimeout(()=>SFX.play('op_'+(st.op||'vanags')),900); M.buzz([100,50,200]);
-    $('taskMsg').style.color='var(--g)'; $('taskMsg').textContent=`✓ PAREIZI! ĪPAŠĪBA PAPILDINĀTA: +${t.reward||1}`;
+    $('taskMsg').style.color='var(--g)';
+    $('taskMsg').textContent=`✓ PAREIZI!${t.show?' Atbilde: '+t.show+'.':''} ĪPAŠĪBA PAPILDINĀTA: +${t.reward||1}`;
     $('taskOk').disabled=true; $('taskLater').textContent='TURPINĀT MISIJU';
   }else{
-    s.fails=(s.fails||0)+1; st.tasks[t.id]=s; save(); SFX.play('error'); M.buzz([60,60,60]);
-    const left=(t.tries||3)-s.fails;
+    x.fails=(x.fails||0)+1; st.tasks[t.id]=x; save(); SFX.play('error'); M.buzz([60,60,60]);
+    const left=(t.tries||3)-x.fails;
     $('taskNo').textContent=`MĒĢINĀJUMI: ${Math.max(0,left)}`;
     $('taskMsg').style.color='var(--red)';
     if(left>0)$('taskMsg').textContent=`✕ Nepareizi. Atlikuši ${left} mēģinājum${left===1?'s':'i'}.`;
-    else{$('taskMsg').textContent='✕ Nepareizi. Mēģinājumi beigušies.';$('taskOk').disabled=true;$('taskLater').textContent='TURPINĀT MISIJU'}
+    else{$('taskMsg').textContent='✕ Nepareizi. Šo uzdevumu atkārtot nevar.';$('taskOk').disabled=true;$('taskLater').textContent='TURPINĀT MISIJU'}
   }
-  renderAbBtn();
+  renderAbBtn(); renderTaskBtn();
 };
-// Jauns, vēl neredzēts uzdevums uzlec automātiski (tikai misijas laikā, kad nav atvērts cits logs)
+// Jauni (vēl neredzēti) uzdevumi: uzlec viens logs ar pirmo, pārējie gaida pie pogas “Papildināt”
 function checkNewTasks(){
   if(!st||!st.start||st.finish||!st.op)return;
   if(busyNow())return;
-  const t=pendingTasks().find(x=>!taskSt(x.id).seen);
-  if(t){SFX.play('warn');setTimeout(()=>SFX.say('New task from H Q'),900);openTask(t.id)}
+  const unseen=pendingTasks().filter(x=>!taskSt(x.id).seen);
+  if(!unseen.length)return;
+  st.tasks=st.tasks||{};
+  unseen.forEach(x=>st.tasks[x.id]=Object.assign({},st.tasks[x.id],{seen:1})); save();
+  SFX.play('warn'); setTimeout(()=>SFX.say('New task from H Q'),900);
+  openTask(unseen[0].id,unseen.length-1);
 }
 setInterval(checkNewTasks,3000);
 
