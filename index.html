@@ -385,6 +385,18 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
   </div>
 </div>
 
+<!-- ŠTĀBA PAZIŅOJUMS -->
+<div class="ov hidden" id="annOv">
+  <div class="box">
+    <div class="bar"><span style="color:var(--g)">● ŠTĀBA PAZIŅOJUMS</span><span id="annClock"></span></div>
+    <div class="stamp" style="color:var(--g)"><svg width="150" height="150" viewBox="0 0 150 150" aria-hidden="true"><circle cx="75" cy="75" r="68" fill="none" stroke="currentColor" stroke-width="4"/><circle cx="75" cy="75" r="58" fill="none" stroke="currentColor" stroke-width="1" stroke-dasharray="4 6"/><path d="M75 0v18M75 132v18M0 75h18M132 75h18" stroke="currentColor" stroke-width="3"/></svg><b id="annBig" style="font-size:44px"></b></div>
+    <div class="st" id="annTitle" style="font-size:30px;line-height:1.05;text-align:center"></div>
+    <p id="annText" style="margin:0;text-align:center;color:#D6DFD2;font-size:17px"></p>
+    <div class="panel mono" id="annTime" style="text-align:center;font-size:15px"></div>
+    <button class="btn cta" id="annOk">SAPRATU</button>
+  </div>
+</div>
+
 <!-- UZDEVUMU SARAKSTS -->
 <div class="ov hidden" id="taskListOv" style="justify-content:flex-start;background:#0a0e0a">
   <div class="box">
@@ -438,7 +450,7 @@ const taskSt=id=>((st&&st.tasks)||{})[id]||{};
 const bonusUses=()=>TASKS().reduce((a,t)=>a+(taskSt(t.id).ok?(t.reward||1):0),0);
 const usesMax=()=>(game.uses||3)+bonusUses();
 const pendingTasks=()=>TASKS().filter(t=>{const s=taskSt(t.id);return !s.ok&&(s.fails||0)<(t.tries||3)});
-const limitMin=()=>game.min+(st&&st.extra||0);
+const limitMin=()=>game.min+(st&&st.extra||0)+M.timeBonus(game);
 const factName=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
 const kpById=id=>game.kp.find(k=>k.id===id);
 
@@ -861,6 +873,25 @@ function checkNewTasks(){
   openTask(unseen[0].id,unseen.length-1);
 }
 setInterval(checkNewTasks,3000);
+
+// Štāba laika pielikums: paziņojums vienreiz katram pielikumam
+function checkTimeBonus(){
+  if(!st||!st.start||st.finish)return;
+  if(busyNow())return;
+  const b=(window.MISIJA_TIME_BONUS||[]).find(x=>(!x.game||x.game===game.id)&&!(st.grants||{})[x.id]);
+  if(!b)return;
+  st.grants=st.grants||{}; st.grants[b.id]=1; save();
+  $('annClock').textContent=M.clock(Date.now());
+  $('annBig').textContent='+'+b.min;
+  $('annTitle').textContent=`+${b.min} MINŪTES`;
+  $('annText').textContent=b.msg||'';
+  $('annTime').textContent='JAUNAIS ATLIKUŠAIS LAIKS: '+M.fmt(st.start+limitMin()*60000-Date.now());
+  $('annOv').classList.remove('hidden');
+  SFX.play('start'); setTimeout(()=>SFX.say('Thirty minutes added'),1700); M.buzz([200,100,200]);
+  tickTimer();
+}
+$('annOk').onclick=()=>{$('annOv').classList.add('hidden');render()};
+setInterval(checkTimeBonus,3000);
 
 /* ---------- FINIŠS ---------- */
 function renderDone(){

@@ -102,7 +102,7 @@
     const complete = nFacts > 0 && facts.size === nFacts;
     const bonus = complete ? (game.bonus || 0) : 0;
     const usedMs = Math.max(0, (finish || Date.now()) - start);
-    const limit = game.min + (extraMin || 0);
+    const limit = game.min + (extraMin || 0) + M.timeBonus(game);
     const overMin = Math.max(0, Math.ceil(usedMs / 60000 - limit - 1e-9));
     const penalty = overMin * game.pen;
     const dq = game.dq > 0 && overMin > game.dq;
@@ -233,6 +233,8 @@
     return g;
   };
 
+  // Štāba laika pielikums (tasks.js), kas attiecas uz šo misiju
+  M.timeBonus = game => (window.MISIJA_TIME_BONUS || []).filter(b => !b.game || b.game === game.id).reduce((a, b) => a + (b.min || 0), 0);
   // Štāba uzdevumu atbilžu pārbaude (kopīga lapai un uzdevumu sagatavošanai)
   M.taskNorm = s => String(s || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
   M.taskNum = s => { const m = String(s || '').replace(',', '.').match(/-?\d+(\.\d+)?/); return m ? Number(m[0]) : NaN; };

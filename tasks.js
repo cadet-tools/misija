@@ -19,3 +19,9 @@ window.MISIJA_TASKS = [
   { id: 't7', q: 'Kādā krāsā orientēšanās kartē attēlo ūdeni (ezerus, upes, grāvjus)?', hint: 'Ieraksti krāsu. Tikai viens mēģinājums!',
     type: 'text', h: ['2fhzzmqtef9', 'xsscxeoh8', '1smtu7dg07s', '1213arcv838', '14augetvdlr', 'zu73ibukku', '1l99ptcpnfg'], tries: 1, reward: 1, show: 'Zilā' }
 ];
+
+// Štāba laika pielikums visiem misijas dalībniekiem (pieskaitās gan telefonā, gan vadītāja aprēķinā).
+// game: misijas id; id: unikāls, lai paziņojums tiktu parādīts vienreiz.
+window.MISIJA_TIME_BONUS = [
+  { id: 'tb1', game: 'op-vejs', min: 30, msg: 'Štābs piešķir visiem papildu 30 minūtes. Izmantojiet tās gudri!' }
+];

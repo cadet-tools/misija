@@ -242,7 +242,7 @@ function addResult(text){
 function msg(cls,t){$('scanMsg').className='small '+cls;$('scanMsg').textContent=t}
 
 function renderResults(){
-  $('resGame').textContent=game.title;
+  $('resGame').textContent=game.title+(M.timeBonus(game)?` · štāba laika pielikums visiem: +${M.timeBonus(game)} min (iekļauts aprēķinā)`:'');
   const rows=results.filter(r=>r.g===game.id).map(r=>({r,sc:M.score(game,r.s,r.f,r.v,r.x||0)}))
     .sort((a,b)=>(b.sc.total-a.sc.total)||(a.sc.usedMs-b.sc.usedMs));
   renderGroups(rows.map(x=>x.r));
