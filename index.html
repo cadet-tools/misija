@@ -428,6 +428,8 @@ async function init(){
 }
 
 function renderCall(){
+  // Labojums: sākotnējā versijā bija kļūdains numurs; jaunsargiem, kas misiju sāka ar to, rādām pareizo
+  if((game.phone||'').replace(/\s/g,'')==='+371244866351'){game.phone=window.MISIJA_DEFAULT.phone;try{localStorage.setItem('misija_game',JSON.stringify(game))}catch(e){}}
   const ph=(game.phone||'').trim(), tel=ph.replace(/[^+\d]/g,'');
   document.querySelectorAll('.callBtn').forEach(a=>{a.href='tel:'+tel;if(!ph)a.classList.add('hidden');else if(a.id!=='resCall')a.classList.remove('hidden')});
   document.querySelectorAll('.callNum').forEach(b=>b.textContent=ph);

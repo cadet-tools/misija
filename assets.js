@@ -1,6 +1,6 @@
 // Bezsaistes failu saraksts: to izmanto gan service worker (sw.js), gan ielādes josla lapā.
 // Mainot jebkuru failu, palielini versiju, lai telefoni ielādētu jauno.
-self.MISIJA_CACHE = 'misija-v17';
+self.MISIJA_CACHE = 'misija-v18';
 self.MISIJA_ASSETS = [
   './', './index.html', './vaditajs.html', './assets.js',
   './common.js', './ops.js', './game.js', './map.js', './sfx.js', './jsqr.js', './qrcode.js',

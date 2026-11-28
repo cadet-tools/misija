@@ -25,7 +25,7 @@ window.MISIJA_DEFAULT = {
   check: 'both',
   // Operatori ar īpašībām (katram 'uses' reizes)
   // Instruktora tālrunis (poga "Zvanīt instruktoram")
-  phone: '+371 244866351',
+  phone: '+371 24866351',
   abil: true,
   uses: 3,
   radius: 30,

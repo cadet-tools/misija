@@ -203,6 +203,7 @@ const $=id=>document.getElementById(id);
 let game=loadGame(), results=loadResults(), stopScan=null, lastScan='';
 
 function loadGame(){try{const g=JSON.parse(localStorage.getItem('misija_admin_game')||'null');const D=window.MISIJA_DEFAULT;
+  if(g&&(g.phone||'').replace(/\s/g,'')==='+371244866351'){g.phone=D.phone;localStorage.setItem('misija_admin_game',JSON.stringify(g))}
   if(g&&(g.v||1)>=D.v)return g;
   // v4 (stāsts, karte, GPS) → saglabājam vadītāja iestatījumus un pievienojam jaunos laukus
   if(g&&(g.v||1)>=4){for(const k of Object.keys(D))if(g[k]===undefined)g[k]=structuredClone(D[k]);
