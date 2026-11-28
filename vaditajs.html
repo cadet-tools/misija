@@ -362,13 +362,15 @@ $('csvBtn').onclick=()=>{
 /* ---------- STARTS ---------- */
 let startUrl='';
 async function renderStart(){
-  startUrl=base()+'#g='+await M.pack(game);
+  startUrl=base()+'#g='+await M.pack(M.gameDiff(game,window.MISIJA_DEFAULT));
   $('startLink').textContent=startUrl;
-  $('startQr').innerHTML=M.qrSvg(startUrl,'L');
+  try{$('startQr').innerHTML=M.qrSvg(startUrl,startUrl.length<600?'M':'L')}
+  catch(e){$('startQr').innerHTML='<div style="color:#000;padding:20px;font:14px system-ui;text-align:center">Saite ir par garu QR kodam (daudz izmainītu KP vai tekstu). Sūti jaunsargiem saiti.</div>'}
   $('startInfo').textContent=`${game.title} · ${game.kp.length} KP · ${M.maxPoints(game)} p. · ${game.min} min · ${(game.facts||[]).length} ziņas · saites garums ${startUrl.length} simboli`;
 }
 $('copyStart').onclick=async()=>{try{await navigator.clipboard.writeText(startUrl);$('copyStart').textContent='✓ Nokopēts'}catch(e){prompt('Nokopē saiti:',startUrl)}setTimeout(()=>$('copyStart').textContent='Kopēt saiti',1500)};
 $('printStart').onclick=()=>{
+  if(!$('startQr').querySelector('svg')){alert('Šai saitei QR kodu izveidot nevar, jo tā ir par garu. Sūti saiti.');return}
   $('printArea').innerHTML=`<div class="pstart"><div style="font:900 28pt Arial">${M.esc(game.title)}</div><div style="font:14pt Arial">Noskenē un atver, KAMĒR IR INTERNETS</div><div class="pq">${M.qrSvg(startUrl,'L')}</div><div style="font:12pt Arial">${game.min} min · ${game.kp.length} kontrolpunkti · CADET.LV</div></div>`;
   window.print();
 };

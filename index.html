@@ -413,7 +413,7 @@ async function init(){
   const h=location.hash;
   const gm=h.match(/[#&]g=([A-Za-z0-9_-]+)/);
   if(gm){
-    try{game=await M.unpack(gm[1]);localStorage.setItem('misija_game',JSON.stringify(game));}
+    try{game=M.gameFromLink(await M.unpack(gm[1]),window.MISIJA_DEFAULT);localStorage.setItem('misija_game',JSON.stringify(game));}
     catch(e){alert('Starta saite ir bojāta. Izmantoju iepriekšējo misiju.');}
   }
   // Saglabāto misiju izmantojam tikai, ja tajā jau ir sākta spēle; citādi jaunākais noklusējums

@@ -219,5 +219,18 @@
   M.dist = (a, b, c, d) => { const R = 6371000, r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
   M.checkMode = game => game.check || 'qr'; // 'qr' | 'gps' | 'both'
 
+  // Starta saitei: tikai lauki, kas atšķiras no noklusējuma (game.js), lai saite ietilptu QR kodā
+  M.gameDiff = (game, def) => {
+    const out = { $d: def.v };
+    for (const k of Object.keys(game)) if (JSON.stringify(game[k]) !== JSON.stringify(def[k])) out[k] = game[k];
+    return out;
+  };
+  M.gameFromLink = (obj, def) => {
+    if (!obj || obj.$d == null) return obj; // vecais formāts: pilna konfigurācija
+    const g = JSON.parse(JSON.stringify(def));
+    for (const k of Object.keys(obj)) if (k !== '$d') g[k] = obj[k];
+    return g;
+  };
+
   window.M = M;
 })();
