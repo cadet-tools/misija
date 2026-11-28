@@ -476,7 +476,7 @@ function startMission(op){
   const name=$('name').value.trim();
   if(!confirm(`Sākt misiju "${game.title}"? Laiks sāks skaitīties uzreiz.`))return;
   st={name,start:Date.now(),finish:null,visits:[],op:op||null,extra:0,uses:[],x2:false,obs:false};
-  save(); M.buzz(80); SFX.play('start'); render(); window.scrollTo(0,0);
+  save(); M.buzz(80); SFX.play('start'); setTimeout(()=>SFX.say('Go, go, go!'),1700); render(); window.scrollTo(0,0);
   if(M.checkMode(game)!=='qr'&&navigator.geolocation)navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,timeout:15000});
 }
 $('startBtn').onclick=()=>{

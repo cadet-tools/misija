@@ -78,7 +78,32 @@
     op_puce: () => { tone(420, 0, 0.35, { type: 'sine', to: 380, vol: 0.25 }); tone(440, 0.45, 0.6, { type: 'sine', to: 360, vol: 0.25 }); }
   };
 
+  // Rācijas ziņojums: klikšķis + šņākoņa, balss (telefona runas sintēze), beigu klikšķis
+  function radioSay(text, o = {}) {
+    if (muted) return;
+    FX.squelch();
+    const sy = window.speechSynthesis;
+    if (!sy || !window.SpeechSynthesisUtterance) return;
+    try {
+      sy.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      const vs = sy.getVoices();
+      const v = vs.find(x => /^en[-_](US|GB)/i.test(x.lang) && /male|daniel|alex|fred|google uk english male/i.test(x.name)) ||
+                vs.find(x => /^en[-_](US|GB)/i.test(x.lang)) || vs.find(x => /^en/i.test(x.lang));
+      if (v) u.voice = v;
+      u.lang = (v && v.lang) || 'en-US';
+      u.rate = o.rate || 1.25; u.pitch = o.pitch || 0.75; u.volume = 1;
+      u.onend = () => FX.squelchEnd();
+      setTimeout(() => sy.speak(u), 260);
+    } catch (e) {}
+  }
+  FX.squelch = () => { noise(0, 0.22, { freq: 1600, q: 0.5, vol: 0.22 }); tone(2400, 0, 0.03, { vol: 0.12 }); };
+  FX.squelchEnd = () => { tone(1800, 0, 0.04, { vol: 0.12 }); noise(0.04, 0.12, { freq: 1600, q: 0.5, vol: 0.18 }); };
+  // Balsis iepriekš ielādējam (Chrome tās dod asinhroni)
+  try { window.speechSynthesis && speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => speechSynthesis.getVoices(); } catch (e) {}
+
   window.SFX = {
+    say(text, o) { try { radioSay(text, o); } catch (e) {} },
     play(name) { try { if (!muted && FX[name]) FX[name](); } catch (e) {} },
     get muted() { return muted; },
     setMuted(v) { muted = !!v; try { localStorage.setItem('misija_mute', muted ? '1' : '0'); } catch (e) {} }
