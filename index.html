@@ -129,7 +129,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 </head>
 <body>
 <div class="wrap">
-  <div class="bar"><span><span class="dot"></span>CADET.LV // <span id="gameTitle">MISIJA</span></span><span id="net"></span></div>
+  <div class="bar"><span><span class="dot"></span>CADET.LV // <span id="gameTitle">MISIJA</span></span><span style="display:flex;align-items:center;gap:10px"><span id="net"></span><button id="muteBtn" data-sfx="none" aria-label="Skaņa" style="background:none;border:1px solid var(--line2);color:var(--mut);font:400 11px 'JetBrains Mono',monospace;letter-spacing:1px;padding:5px 8px;cursor:pointer"></button></span></div>
 
   <!-- 1. INSTRUKTĀŽA -->
   <section id="vBrief" class="hidden" style="display:flex;flex-direction:column;gap:12px">
@@ -154,7 +154,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
     </label>
     <button class="btn" id="mapBtn1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>KARTE UN MARŠRUTA PLĀNS</button>
     <button class="btn" id="legBtn1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>KP LEĢENDAS UN APZĪMĒJUMI</button>
-    <button class="btn cta" id="startBtn">SĀKT MISIJU</button>
+    <button class="btn cta" id="startBtn" data-sfx="none">SĀKT MISIJU</button>
     <p class="mut small" id="offlineNote" style="margin:0">Rīks darbojas bez interneta. Neaizver un nedzēs pārlūka datus līdz finišam.</p>
   </section>
 
@@ -179,7 +179,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       </div>
     </div>
     <div class="opgrid" id="opGrid"></div>
-    <button class="btn cta" id="opsStart">GATAVS · SĀKT MISIJU</button>
+    <button class="btn cta" id="opsStart" data-sfx="none">GATAVS · SĀKT MISIJU</button>
     <button class="btn ghost" id="opsBack">ATPAKAĻ</button>
   </section>
 
@@ -222,7 +222,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 
     <div class="armed hidden" id="armedBox"></div>
 
-    <button class="btn cta big" id="gpsBtn"><span class="pulse"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#061006" stroke-width="2.5" aria-hidden="true"><circle cx="20" cy="20" r="17"/><circle cx="20" cy="20" r="9"/><path d="M20 20L32 8"/><circle cx="20" cy="20" r="2.5" fill="#061006"/></svg></span><span style="display:flex;flex-direction:column;line-height:1;text-align:left"><span style="font-size:28px">ESMU PIE KP</span><span class="mono" style="font-size:11px;font-weight:700;letter-spacing:1px;margin-top:4px">GPS APSTIPRINĀJUMS</span></span></button>
+    <button class="btn cta big" id="gpsBtn" data-sfx="none"><span class="pulse"><svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#061006" stroke-width="2.5" aria-hidden="true"><circle cx="20" cy="20" r="17"/><circle cx="20" cy="20" r="9"/><path d="M20 20L32 8"/><circle cx="20" cy="20" r="2.5" fill="#061006"/></svg></span><span style="display:flex;flex-direction:column;line-height:1;text-align:left"><span style="font-size:28px">ESMU PIE KP</span><span class="mono" style="font-size:11px;font-weight:700;letter-spacing:1px;margin-top:4px">GPS APSTIPRINĀJUMS</span></span></button>
     <button class="btn cta big hidden" id="scanBigBtn"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><path d="M8 8h3v3H8zM13 13h3v3h-3zM13 8h3M8 13v3"/></svg><span style="font-size:28px">SKENĒT KP</span></button>
 
     <div class="grid4">
@@ -239,7 +239,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <div id="intelList"></div>
     </details>
 
-    <button class="btn warn" id="finishBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>FINIŠS: ESMU ŠTĀBĀ</button>
+    <button class="btn warn" id="finishBtn" data-sfx="none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>FINIŠS: ESMU ŠTĀBĀ</button>
   </section>
 
   <!-- 3. FINIŠS -->
@@ -359,7 +359,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
     </div>
     <div id="abForm" style="display:flex;flex-direction:column;gap:8px"></div>
     <div class="panel hidden" id="abRes" style="border-color:var(--acc);background:#0c160c"></div>
-    <button class="btn cta" id="abUse">IZMANTOT</button>
+    <button class="btn cta" id="abUse" data-sfx="none">IZMANTOT</button>
     <button class="btn" id="abClose">AIZVĒRT</button>
   </div>
 </div>
@@ -370,6 +370,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 <script src="ops.js"></script>
 <script src="game.js"></script>
 <script src="map.js"></script>
+<script src="sfx.js"></script>
 <script>
 const $=id=>document.getElementById(id);
 let game=null, st=null, stopScan=null, timerInt=null, busyScan=false, pickOp='vanags';
@@ -455,21 +456,22 @@ function renderOps(){
   $('opHeroAv').innerHTML=avatarSvg(o.k,110);
   $('opHeroRole').textContent=o.role; $('opHeroName').textContent=o.name; $('opHeroMotto').textContent=o.motto;
   $('opHeroAb').textContent=o.ab; $('opHeroAd').textContent=o.ad; $('opHeroUses').textContent='◆'.repeat(usesMax())+' '+usesMax()+'×';
-  $('opGrid').innerHTML=OPS.map(x=>`<button class="opc" data-k="${x.k}" aria-pressed="${x.k===o.k}" style="${x.k===o.k?`border-color:${x.c};box-shadow:0 0 0 1px ${x.c} inset`:''}">${avatarSvg(x.k,58)}<span class="n">${x.name}</span><span class="r">${x.role}</span><span class="a" style="color:${x.c}">${x.ab}</span></button>`).join('');
+  $('opGrid').innerHTML=OPS.map(x=>`<button class="opc" data-sfx="none" data-k="${x.k}" aria-pressed="${x.k===o.k}" style="${x.k===o.k?`border-color:${x.c};box-shadow:0 0 0 1px ${x.c} inset`:''}">${avatarSvg(x.k,58)}<span class="n">${x.name}</span><span class="r">${x.role}</span><span class="a" style="color:${x.c}">${x.ab}</span></button>`).join('');
 }
-$('opGrid').addEventListener('click',e=>{const b=e.target.closest('.opc');if(!b)return;pickOp=b.dataset.k;renderOps()});
+$('opGrid').addEventListener('click',e=>{const b=e.target.closest('.opc');if(!b)return;pickOp=b.dataset.k;SFX.play('op_'+pickOp);renderOps()});
 
 function startMission(op){
   const name=$('name').value.trim();
   if(!confirm(`Sākt misiju "${game.title}"? Laiks sāks skaitīties uzreiz.`))return;
   st={name,start:Date.now(),finish:null,visits:[],op:op||null,extra:0,uses:[],x2:false,obs:false};
-  save(); M.buzz(80); render(); window.scrollTo(0,0);
+  save(); M.buzz(80); SFX.play('start'); render(); window.scrollTo(0,0);
   if(M.checkMode(game)!=='qr'&&navigator.geolocation)navigator.geolocation.getCurrentPosition(()=>{},()=>{},{enableHighAccuracy:true,timeout:15000});
 }
 $('startBtn').onclick=()=>{
+  SFX.play('click');
   const name=$('name').value.trim();
   if(!name){$('name').focus();alert('Ieraksti savu vārdu vai komandas nosaukumu.');return}
-  if(abilOn()){show('vOps');renderOps();window.scrollTo(0,0)}else startMission(null);
+  if(abilOn()){show('vOps');renderOps();SFX.play('op_'+pickOp);window.scrollTo(0,0)}else startMission(null);
 };
 $('opsStart').onclick=()=>startMission(pickOp);
 $('opsBack').onclick=()=>{setAccent(null);show('vBrief')};
@@ -521,6 +523,9 @@ function tickTimer(){
   $('timerLabel').textContent=left<0?'KAVĒJUMS':'ATLICIS';
   $('lateInfo').textContent=left<0?`KAVĒJUMS! Sods šobrīd −${sc.penalty} p.`+(sc.dq?' · rezultāts vairs netiek ieskaitīts':'')+' · steidzies uz štābu':'';
   $('sPts').textContent=sc.raw; $('sKp').textContent=sc.count;
+  // Skaņas brīdinājumi: 15 min atlikušas un laiks beidzies (katrs vienu reizi)
+  if(left<=15*60000&&left>0&&!st.w15){st.w15=true;save();SFX.play('warn');M.buzz([200,100,200])}
+  if(left<=0&&!st.w0){st.w0=true;save();SFX.play('alarm');M.buzz([400,200,400,200,400])}
 }
 
 /* ---------- KP APSTIPRINĀŠANA ---------- */
@@ -547,11 +552,12 @@ function registerKp(k,method){
   }
   const v=[k.id,Math.round((Date.now()-st.start)/1000),method==='g'?'g':'q'];
   if(flags.length)v.push(flags.join(','));
-  st.visits.push(v); save(); M.buzz([100,50,200]);
+  st.visits.push(v); save(); M.buzz([100,50,200]); SFX.play('success');
   const after=M.foundFacts(game,st.visits);
   const pts=k.p*(flags.includes('x2')?2:1);
   const fresh=(game.facts||[]).filter(f=>after.has(f.id)&&!before.has(f.id));
   const known=(k.f||[]).filter(id=>before.has(id));
+  if(fresh.length)SFX.play('decode');
   showRes({kind:'ok',big:'+'+pts,title:`KP ${k.id} APSTIPRINĀTS`,
     sub:(method==='g'?'APSTIPRINĀTS AR GPS':'APSTIPRINĀTS AR KODU')+(flags.includes('x2')?' · PAVĒLE ×2':'')+` · KOPĀ ${M.score(game,st.start,null,st.visits,st.extra||0).raw} P.`,
     intel:k,
@@ -561,7 +567,7 @@ function registerKp(k,method){
   render();
 }
 
-function showErr(big,title,text,kind){showRes({kind:kind||'err',big,title,sub:'',text})}
+function showErr(big,title,text,kind){SFX.play(kind==='dup'?'dup':'error');showRes({kind:kind||'err',big,title,sub:'',text})}
 function showRes(o){
   const col=o.kind==='ok'?'var(--g)':o.kind==='dup'?'var(--amber)':'var(--red)';
   $('resStamp').style.color=col; $('resBig').style.color=col;
@@ -612,7 +618,9 @@ $('gpsBtn').onclick=()=>{
   let best=null,started=Date.now(),done=false,soon=null;
   setSig(null); $('gpsProg').style.width='0%';
   $('gpsOv').classList.remove('hidden');
-  gpsTick=setInterval(()=>{$('gpsProg').style.width=Math.min(100,(Date.now()-started)/300)+'%'},300);
+  SFX.play('click'); SFX.play('ping');
+  let lastPing=Date.now();
+  gpsTick=setInterval(()=>{$('gpsProg').style.width=Math.min(100,(Date.now()-started)/300)+'%';if(Date.now()-lastPing>=2400){lastPing=Date.now();SFX.play('ping')}},300);
   const finish=()=>{
     if(done)return; done=true; clearTimeout(soon);
     stopGpsCheck();
@@ -671,7 +679,7 @@ function openAb(){
   $('abUse').textContent=left>0?`IZMANTOT (${left})`:'ĪPAŠĪBA IZLIETOTA';
   $('abOv').classList.remove('hidden');
 }
-$('abBtn').onclick=openAb;
+$('abBtn').onclick=()=>{openAb();SFX.play('soft')};
 $('abClose').onclick=()=>{$('abOv').classList.add('hidden');render()};
 $('abUse').onclick=()=>{
   const o=opById(st.op); if(!o||usedCount()>=usesMax())return;
@@ -702,7 +710,7 @@ $('abUse').onclick=()=>{
   if(o.k==='udris'){st.extra=(st.extra||0)+10;title=`+10 MIN · LAIKS ${M.fmt(st.start+limitMin()*60000-Date.now())}`;text='Misijas laiks pagarināts. Soda minūtes sāksies 10 minūtes vēlāk.'}
   if(o.k==='puce'){st.obs=true;title='NOVĒROŠANA AKTĪVA';text='Nākamajā KP saņemsi gan tā ziņu, gan vēl vienu, kuras tev trūkst.'}
   st.uses.push([Math.round((Date.now()-st.start)/1000),o.ab,title+'. '+text]);
-  save(); M.buzz([60,40,60]);
+  save(); M.buzz([60,40,60]); SFX.play('op_'+o.k);
   $('abRes').innerHTML=`<div class="mono" style="font-size:11px;letter-spacing:1.5px;color:var(--acc)">REZULTĀTS</div><div class="st" style="font-size:21px;line-height:1.15;margin-top:4px">${M.esc(title)}</div><div style="font-size:15px;color:#C3D0BE;margin-top:4px">${M.esc(text)}</div>`;
   $('abRes').classList.remove('hidden');
   const left=usesMax()-usedCount();
@@ -738,8 +746,9 @@ function renderDone(){
 }
 
 $('finishBtn').onclick=()=>{
+  SFX.play('click');
   if(!confirm('Vai tiešām esi štābā? Pēc finiša vairs nevarēsi atzīmēt KP.'))return;
-  st.finish=Date.now(); save(); M.buzz([200,100,200]); render(); window.scrollTo(0,0);
+  st.finish=Date.now(); save(); M.buzz([200,100,200]); SFX.play('finish'); setTimeout(()=>SFX.play('stamp'),1400); render(); window.scrollTo(0,0);
 };
 $('newBtn').onclick=()=>{
   if(!confirm('Vai tiešām dzēst šo rezultātu un sākt no jauna? Pārliecinies, ka vadītājs jau noskenēja tavu kodu.'))return;
@@ -821,7 +830,7 @@ $('legList').addEventListener('click',e=>{const b=e.target.closest('[data-map]')
 let mapView=null, mapGameId=null;
 function openMap(focusKp){
   if(!game.map){alert('Šai misijai nav pievienota karte.');return}
-  $('mapOv').classList.remove('hidden');
+  $('mapOv').classList.remove('hidden'); SFX.play('map');
   $('mapTitle').textContent='KARTE';
   if(!mapView||mapGameId!==game.id){
     const tools=$('mapVp').querySelector('.maptools'),leg=$('mapVp').querySelector('.maplegend');
@@ -836,6 +845,12 @@ function openMap(focusKp){
 $('mapBtn1').onclick=()=>openMap(); $('mapBtn2').onclick=()=>openMap();
 $('mapClose').onclick=()=>$('mapOv').classList.add('hidden');
 $('mzIn').onclick=()=>mapView.zoom(1.5); $('mzOut').onclick=()=>mapView.zoom(1/1.5); $('mzFit').onclick=()=>mapView.fit();
+
+// Visām pogām klikšķis (izņemot tās, kurām ir sava skaņa)
+document.addEventListener('click',e=>{const b=e.target.closest('button,a.btn');if(!b||b.dataset.sfx==='none'||b.disabled)return;SFX.play('click')},true);
+function renderMute(){$('muteBtn').textContent=SFX.muted?'SKAŅA: IZSL.':'SKAŅA: IESL.'}
+$('muteBtn').onclick=()=>{SFX.setMuted(!SFX.muted);renderMute();SFX.play('click')};
+renderMute();
 
 function net(){ $('net').textContent=navigator.onLine?'● TIEŠSAISTĒ':'○ BEZSAISTE' }
 addEventListener('online',net);addEventListener('offline',net);net();
