@@ -5,8 +5,11 @@
 // KP atrašanās vietas LOF kartes attēlā (pikseļos), no VK2
 const XY = {"21":[1502.0,1124.0],"23":[1575.0,297.0],"31":[992.0,836.0],"32":[814.0,1189.0],"33":[1654.0,927.0],"35":[753.0,952.0],"41":[1825.0,501.0],"42":[1331.0,409.0],"43":[1211.0,512.0],"44":[807.0,800.0],"46":[1517.0,947.0],"47":[283.0,1061.0],"48":[2353.0,716.0],"49":[1855.0,790.0],"50":[697.0,1135.0],"51":[1333.0,587.0],"52":[1713.0,266.0],"53":[2288.0,406.0],"54":[1642.0,751.0],"55":[413.0,928.0],"56":[2135.0,284.0],"57":[2108.0,633.0],"61":[2175.0,875.0],"62":[1646.0,1199.0],"63":[1509.0,1582.0],"81":[1673.0,1514.0],"82":[2399.0,1047.0],"83":[1931.0,145.0],"91":[1593.0,625.0],"92":[106.0,1136.0]};
 
+// KP leģendas (no VK2): o = objekts, v = KP vieta pie objekta, l = ko meklēt
+const LEG = {"23": {"o": "Taku krustojums “+ / X” veida","v": "Krustojuma centrs","l": "Meklē vietu, kur divas takas krustojas “+” vai “X” veidā."},"31": {"o": "Grāvja DA stūris","v": "Dienvidaustrumu stūris","l": "Meklē kartē norādīto grāvi un nosaki tā dienvidaustrumu stūri."},"32": {"o": "Taku krustojums “+ / X” veida","v": "Krustojuma centrs","l": "Meklē vietu, kur divas takas krustojas “+” vai “X” veidā."},"35": {"o": "Paugurs","v": "LOF apļa centrs","l": "Meklē kartē norādīto pauguru."},"42": {"o": "Ēka","v": "LOF apļa centrs","l": "Meklē kartē norādīto ēku."},"43": {"o": "Taku atzars “Y” krustojums","v": "“Y” atzara centrs","l": "Meklē vietu, kur taka sadalās vai pievienojas citai takai “Y” veidā."},"44": {"o": "Grāvis","v": "LOF apļa centrs","l": "Meklē kartē norādīto grāvi."},"47": {"o": "Taku atzars “Y” krustojums","v": "“Y” atzara centrs","l": "Meklē vietu, kur taka sadalās vai pievienojas citai takai “Y” veidā."},"50": {"o": "Paugurs","v": "LOF apļa centrs","l": "Meklē kartē norādīto pauguru."},"51": {"o": "Taku atzars “Y” krustojums","v": "“Y” atzara centrs","l": "Meklē vietu, kur taka sadalās vai pievienojas citai takai “Y” veidā."},"52": {"o": "Taku atzars “Y” krustojums","v": "“Y” atzara centrs","l": "Meklē vietu, kur taka sadalās vai pievienojas citai takai “Y” veidā."},"55": {"o": "Takas R galā","v": "Rietumu gals","l": "Meklē kartē norādītās takas rietumu galu."},"83": {"o": "Paugurs","v": "LOF apļa centrs","l": "Meklē kartē norādīto pauguru."},"92": {"o": "Paugurs","v": "LOF apļa centrs","l": "Meklē kartē norādīto pauguru."}};
+
 window.MISIJA_DEFAULT = {
-  v: 5,
+  v: 6,
   id: 'op-vejs',
   key: 'vejs-2026-cadet',
   title: 'Operācija VĒJŠ',
@@ -54,5 +57,5 @@ window.MISIJA_DEFAULT = {
     ['55', 'Pie vecā bunkura svaigi ugunskura pelni un tukšas konservu kārbas.', ['baze']],
     ['83', 'Ienaidnieka kurjera soma! Tajā pavēle ar grupas sastāvu un uzbrukuma laiku.', ['kas', 'laiks']],
     ['92', 'Aizturēts ienaidnieka ziņnesis! Viņš izstāsta, kur ir bāze un kāda ir parole.', ['baze', 'parole']]
-  ].map(([id, m, f]) => ({ id, p: Number(id[0]), m, f, x: XY[id][0], y: XY[id][1] }))
+  ].map(([id, m, f]) => ({ id, p: Number(id[0]), m, f, x: XY[id][0], y: XY[id][1], leg: LEG[id] }))
 };

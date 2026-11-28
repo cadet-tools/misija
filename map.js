@@ -13,7 +13,7 @@
     inner.append(img, svg); vp.innerHTML = ''; vp.appendChild(inner);
 
     let W = 2481, H = 1754, s = 0.2, tx = 0, ty = 0, minS = 0.05, ready = false;
-    let visited = new Set(), marks = [];
+    let visited = new Set(), marks = [], hl = null;
 
     function el(tag, attrs, parent) { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); (parent || svg).appendChild(e); return e; }
 
@@ -49,7 +49,7 @@
           m.c.setAttribute('cx', m.x); m.c.setAttribute('cy', m.y); m.c.setAttribute('r', r);
           // Caurspīdīgs aplis kā orientēšanās kartē, lai redzams apvidus centrā
           m.c.setAttribute('fill', v ? 'rgba(95,208,122,.45)' : 'none');
-          m.c.setAttribute('stroke', v ? '#0d8a2e' : '#c51fc5'); m.c.setAttribute('stroke-width', 3.5 * u);
+          m.c.setAttribute('stroke', m.id === hl ? '#ff7a00' : v ? '#0d8a2e' : '#c51fc5'); m.c.setAttribute('stroke-width', (m.id === hl ? 6 : 3.5) * u);
           m.t.setAttribute('x', m.x + r * 1.15); m.t.setAttribute('y', m.y - r * 0.85); m.t.setAttribute('font-size', 15 * u);
           m.t.setAttribute('text-anchor', 'start');
           m.t.setAttribute('fill', v ? '#0d6a26' : '#a0129f'); m.t.setAttribute('stroke', '#fff'); m.t.setAttribute('stroke-width', 3.5 * u); m.t.setAttribute('paint-order', 'stroke');
@@ -113,6 +113,12 @@
     return {
       setVisited(set) { visited = set; if (ready) drawMarks(); },
       fit() { if (ready) fit(); },
+      // Pietuvina karti konkrētam punktam (attēla px)
+      focus(x, y, scale) {
+        const go = () => { const vw = vp.clientWidth, vh = vp.clientHeight; s = Math.max(s, scale || 0.9); tx = vw / 2 - x * s; ty = vh / 2 - y * s; apply(); };
+        if (ready) go(); else img.addEventListener('load', () => setTimeout(go, 0), { once: true });
+      },
+      highlight(id) { hl = id; if (ready) drawMarks(); },
       zoom(f) { zoomAt(f, vp.clientWidth / 2, vp.clientHeight / 2); },
     };
   };

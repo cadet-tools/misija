@@ -48,7 +48,7 @@ input:focus,select:focus{border-color:var(--acc)}
 .btn.warn{border-color:var(--amber);color:var(--amber);background:transparent;font-weight:800;letter-spacing:2px}
 .btn.ghost{background:transparent}
 .btn:disabled{opacity:.4}
-.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(70px,1fr));gap:6px}
+.grid4{display:grid;grid-template-columns:repeat(auto-fit,minmax(62px,1fr));gap:6px}
 .sq{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;height:66px;border:1px solid var(--line2);background:#121a11;color:var(--txt);font:700 13px 'Saira Condensed',sans-serif;letter-spacing:.8px;cursor:pointer}
 .sq.ab{border-color:var(--acc);background:#102910;color:var(--acc)}
 .sq:disabled{opacity:.4}
@@ -110,6 +110,20 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 .maptools{position:absolute;right:10px;bottom:calc(14px + env(safe-area-inset-bottom));display:grid;gap:8px;z-index:2}
 .maptools button{width:52px;height:52px;border:1px solid var(--line2);background:rgba(10,14,10,.92);color:#fff;font:700 22px system-ui}
 .maplegend{position:absolute;left:10px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:2;background:rgba(10,14,10,.9);color:#fff;padding:8px 10px;font:400 11px/1.7 'JetBrains Mono',monospace}
+.legc{border:1px solid var(--line);background:var(--panel);padding:12px;display:flex;gap:12px;margin-top:10px}
+.legc.vis{opacity:.6}
+.legc .ic{width:54px;height:54px;flex:none;border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;background:#fff}
+.legc .kp{font:400 22px/1 'Saira Stencil One',sans-serif}
+.legc .ob{font-size:16px;font-weight:700;color:#F2F6EF;margin-top:4px}
+.legc .pl{font:400 12px 'JetBrains Mono',monospace;color:var(--amber);margin-top:2px}
+.legc .lk{font-size:14px;color:#C3D0BE;margin-top:4px;line-height:1.3}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.tabs button{height:44px;border:1px solid var(--line2);background:#121a11;color:var(--mut);font:700 14px 'Saira Condensed',sans-serif;letter-spacing:1.5px}
+.tabs button.on{border-color:var(--acc);color:var(--acc);background:#102910}
+.gl{display:flex;gap:12px;align-items:center;border-bottom:1px solid #22301f;padding:10px 0}
+.gl .ic{width:46px;height:46px;flex:none;border:1px solid var(--line2);background:#fff;display:flex;align-items:center;justify-content:center}
+.gl b{display:block;font-size:16px}.gl span{font-size:14px;color:#C3D0BE}
+.sw{display:inline-block;width:14px;height:14px;vertical-align:-2px;margin-right:6px;border:1px solid #556}
 .md{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:4px}
 </style>
 </head>
@@ -139,6 +153,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <input id="name" maxlength="40" autocomplete="off" placeholder="piem. Jānis B. / 2. vads">
     </label>
     <button class="btn" id="mapBtn1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>KARTE UN MARŠRUTA PLĀNS</button>
+    <button class="btn" id="legBtn1"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>KP LEĢENDAS UN APZĪMĒJUMI</button>
     <button class="btn cta" id="startBtn">SĀKT MISIJU</button>
     <p class="mut small" id="offlineNote" style="margin:0">Rīks darbojas bez interneta. Neaizver un nedzēs pārlūka datus līdz finišam.</p>
   </section>
@@ -214,6 +229,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <button class="sq" id="mapBtn2"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3z"/><path d="M9 3v15M15 6v15"/></svg>KARTE</button>
       <button class="sq" id="scanBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 8V4h4M16 4h4v4M20 16v4h-4M8 20H4v-4"/><path d="M8 8h3v3H8zM13 13h3v3h-3zM13 8h3M8 13v3"/></svg>SKENĒT QR</button>
       <button class="sq" id="manualBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="1"/><path d="M7 10h.01M11 10h.01M15 10h.01M7 14h10"/></svg>KODS</button>
+      <button class="sq" id="legBtn2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>LEĢENDA</button>
       <button class="sq ab" id="abBtn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg>ĪPAŠĪBA<span class="mono" id="abPips" style="font-size:10px;letter-spacing:2px"></span></button>
     </div>
 
@@ -260,6 +276,18 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <button id="mzFit" aria-label="Visa misija" style="font-size:18px">⤢</button>
     </div>
     <div class="maplegend"><span class="md" style="border:2px solid #c51fc5"></span>jāapmeklē · <span class="md" style="background:#5fd07a;border:2px solid #0d5c22"></span>apmeklēts<br><span style="color:#e07ae0">△</span> starts/finišs · <span id="mapCount"></span></div>
+  </div>
+</div>
+
+<!-- LEĢENDA / KATALOGS -->
+<div class="ov hidden" id="legOv" style="justify-content:flex-start;background:#0a0e0a">
+  <div class="box">
+    <div class="bar"><span>KP KATALOGS</span><span id="legCount"></span></div>
+    <div class="st" style="font-size:28px;line-height:1">LEĢENDAS</div>
+    <div class="tabs"><button id="legTab1" class="on">KONTROLPUNKTI</button><button id="legTab2">APZĪMĒJUMI</button></div>
+    <div id="legList"></div>
+    <div id="legGloss" class="hidden"></div>
+    <button class="btn" id="legClose" style="position:sticky;bottom:0">AIZVĒRT</button>
   </div>
 </div>
 
@@ -718,9 +746,80 @@ $('newBtn').onclick=()=>{
   localStorage.removeItem(stKey()); st=null; render();
 };
 
+/* ---------- LEĢENDAS ---------- */
+// Vienkāršoti piktogrammas (melns uz balta, kā KP aprakstu tabulās)
+const PICT={
+  cross:'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#111" stroke-width="3"><path d="M6 6L34 34M34 6L6 34"/></svg>',
+  y:'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#111" stroke-width="3"><path d="M20 36V20L8 6M20 20L32 6"/></svg>',
+  knoll:'<svg width="40" height="40" viewBox="0 0 40 40"><ellipse cx="20" cy="22" rx="11" ry="8" fill="none" stroke="#8a4b16" stroke-width="3"/><circle cx="20" cy="22" r="2.5" fill="#8a4b16"/></svg>',
+  ditch:'<svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#1d6fd1" stroke-width="3"><path d="M4 30C14 26 22 18 36 10"/></svg>',
+  ditchse:'<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M6 8H30V32" stroke="#1d6fd1" stroke-width="3"/><circle cx="30" cy="32" r="4" fill="#c51fc5"/></svg>',
+  building:'<svg width="40" height="40" viewBox="0 0 40 40"><rect x="10" y="12" width="20" height="16" fill="#111"/></svg>',
+  pathend:'<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><path d="M36 20H12" stroke="#111" stroke-width="3" stroke-dasharray="5 3"/><circle cx="9" cy="20" r="4" fill="#c51fc5"/></svg>',
+  circle:'<svg width="40" height="40" viewBox="0 0 40 40" fill="none"><circle cx="20" cy="20" r="13" stroke="#c51fc5" stroke-width="3"/><circle cx="20" cy="20" r="1.8" fill="#c51fc5"/></svg>',
+  dot:'<svg width="40" height="40" viewBox="0 0 40 40"><circle cx="20" cy="20" r="5" fill="#111"/></svg>'
+};
+function pictFor(o){
+  o=(o||'').toLowerCase();
+  if(o.includes('krustojums')&&o.includes('y'))return PICT.y;
+  if(o.includes('atzar'))return PICT.y;
+  if(o.includes('krustojum'))return PICT.cross;
+  if(o.includes('paugur'))return PICT.knoll;
+  if(o.includes('grāv')&&o.includes('stūr'))return PICT.ditchse;
+  if(o.includes('grāv'))return PICT.ditch;
+  if(o.includes('ēka'))return PICT.building;
+  if(o.includes('gal'))return PICT.pathend;
+  return PICT.dot;
+}
+const GLOSS=[
+  [PICT.circle,'KP aplis kartē','Kontrolpunkts atrodas tieši apļa centrā. Aplis tikai iezīmē vietu, tas pats nav redzams dabā.'],
+  [PICT.cross,'Taku krustojums (+ / X)','Divas takas krustojas. KP ir krustojuma centrā.'],
+  [PICT.y,'Taku atzars (Y)','Taka sadalās divās vai pievienojas citai takai. KP ir tur, kur takas savienojas.'],
+  [PICT.knoll,'Paugurs','Neliels pacēlums apvidū. Kartē brūna noslēgta horizontāle (aplis vai ovāls) vai brūns punkts. KP ir paugura virsotnē.'],
+  [PICT.ditch,'Grāvis','Rakta tranšeja zemē. Kartē tieva līnija, zila, ja tajā ir ūdens.'],
+  [PICT.ditchse,'Grāvja stūris','Vieta, kur grāvis pagriežas. Virziens (piem. DA) norāda, kurā stūrī ir KP.'],
+  [PICT.building,'Ēka','Kartē melns laukums. KP ir pie ēkas, kā rāda apļa centrs.'],
+  [PICT.pathend,'Takas gals','Vieta, kur taka beidzas. Virziens (piem. R gals) norāda, kurš gals.']
+];
+function legHtml(){
+  const vis=new Set((st&&st.visits||[]).map(v=>v[0]));
+  return [...game.kp].sort((a,b)=>Number(a.id)-Number(b.id)||a.id.localeCompare(b.id)).map(k=>{
+    const L=k.leg||{};
+    return `<div class="legc${vis.has(k.id)?' vis':''}">
+      <div class="ic">${pictFor(L.o)}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span class="kp">KP ${M.esc(k.id)}</span><span class="mono small" style="color:var(--acc)">${k.p} P.${vis.has(k.id)?' · ✓ APMEKLĒTS':''}</span></div>
+        <div class="ob">${M.esc(L.o||'Apraksts nav pievienots')}</div>
+        ${L.v?`<div class="pl">KP VIETA: ${M.esc(L.v.toUpperCase())}</div>`:''}
+        ${L.l?`<div class="lk">${M.esc(L.l)}</div>`:''}
+        ${game.map&&k.x!=null?`<button class="btn" data-map="${M.esc(k.id)}" style="min-height:40px;margin-top:8px;font-size:14px">RĀDĪT KARTĒ</button>`:''}
+      </div></div>`}).join('');
+}
+function glossHtml(){
+  return GLOSS.map(([ic,t,x])=>`<div class="gl"><div class="ic">${ic}</div><div><b>${t}</b><span>${x}</span></div></div>`).join('')+
+  `<div class="panel" style="margin-top:12px"><div class="lbl" style="margin-bottom:6px">Virzieni</div><div class="mono small" style="line-height:1.7">Z – ziemeļi · D – dienvidi · A – austrumi · R – rietumi<br>ZA · ZR · DA · DR – starpvirzieni (piem. DA = dienvidaustrumi)</div></div>
+  <div class="panel" style="margin-top:10px"><div class="lbl" style="margin-bottom:6px">Krāsas orientēšanās kartē</div><div style="font-size:14px;line-height:1.8">
+  <span class="sw" style="background:#111"></span>melns: takas, ceļi, ēkas, akmeņi<br>
+  <span class="sw" style="background:#8a4b16"></span>brūns: reljefs (horizontāles, pauguri, ieplakas)<br>
+  <span class="sw" style="background:#1d6fd1"></span>zils: ūdens (ezeri, upes, grāvji, purvi)<br>
+  <span class="sw" style="background:#3fa046"></span>zaļš: blīvs mežs vai krūmi, grūti iziet<br>
+  <span class="sw" style="background:#fff"></span>balts: parasts, labi caurejams mežs<br>
+  <span class="sw" style="background:#f2c94c"></span>dzeltens: atklāta vieta (pļava, lauks)</div></div>`;
+}
+function openLeg(tab){
+  $('legList').innerHTML=legHtml(); $('legGloss').innerHTML=glossHtml();
+  $('legCount').textContent=game.kp.length+' KP';
+  setLegTab(tab||1); $('legOv').classList.remove('hidden'); $('legOv').scrollTop=0;
+}
+function setLegTab(n){$('legTab1').classList.toggle('on',n===1);$('legTab2').classList.toggle('on',n===2);$('legList').classList.toggle('hidden',n!==1);$('legGloss').classList.toggle('hidden',n!==2)}
+$('legTab1').onclick=()=>setLegTab(1); $('legTab2').onclick=()=>setLegTab(2);
+$('legBtn1').onclick=()=>openLeg(1); $('legBtn2').onclick=()=>openLeg(1);
+$('legClose').onclick=()=>$('legOv').classList.add('hidden');
+$('legList').addEventListener('click',e=>{const b=e.target.closest('[data-map]');if(!b)return;const k=kpById(b.dataset.map);$('legOv').classList.add('hidden');openMap(k)});
+
 /* ---------- KARTE ---------- */
 let mapView=null, mapGameId=null;
-function openMap(){
+function openMap(focusKp){
   if(!game.map){alert('Šai misijai nav pievienota karte.');return}
   $('mapOv').classList.remove('hidden');
   $('mapTitle').textContent=game.title.toUpperCase()+' · KARTE';
@@ -731,9 +830,10 @@ function openMap(){
   const vis=new Set((st&&st.visits||[]).map(v=>v[0]));
   mapView.setVisited(vis);
   $('mapCount').textContent=`${vis.size}/${game.kp.length} KP`;
-  requestAnimationFrame(()=>mapView.fit());
+  mapView.highlight(focusKp&&focusKp.id||null);
+  requestAnimationFrame(()=>{if(focusKp&&focusKp.x!=null)mapView.focus(focusKp.x,focusKp.y,1.1);else mapView.fit()});
 }
-$('mapBtn1').onclick=openMap; $('mapBtn2').onclick=openMap;
+$('mapBtn1').onclick=()=>openMap(); $('mapBtn2').onclick=()=>openMap();
 $('mapClose').onclick=()=>$('mapOv').classList.add('hidden');
 $('mzIn').onclick=()=>mapView.zoom(1.5); $('mzOut').onclick=()=>mapView.zoom(1/1.5); $('mzFit').onclick=()=>mapView.fit();
 

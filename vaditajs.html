@@ -204,7 +204,9 @@ let game=loadGame(), results=loadResults(), stopScan=null, lastScan='';
 function loadGame(){try{const g=JSON.parse(localStorage.getItem('misija_admin_game')||'null');const D=window.MISIJA_DEFAULT;
   if(g&&(g.v||1)>=D.v)return g;
   // v4 (stāsts, karte, GPS) → saglabājam vadītāja iestatījumus un pievienojam jaunos laukus
-  if(g&&(g.v||1)>=4){for(const k of Object.keys(D))if(g[k]===undefined)g[k]=structuredClone(D[k]);g.v=D.v;localStorage.setItem('misija_admin_game',JSON.stringify(g));return g}
+  if(g&&(g.v||1)>=4){for(const k of Object.keys(D))if(g[k]===undefined)g[k]=structuredClone(D[k]);
+    for(const kp of g.kp||[]){const d=D.kp.find(x=>x.id===kp.id);if(d&&!kp.leg&&d.leg)kp.leg=structuredClone(d.leg)}
+    g.v=D.v;localStorage.setItem('misija_admin_game',JSON.stringify(g));return g}
 }catch(e){}return structuredClone(window.MISIJA_DEFAULT)}
 function saveGameLS(){localStorage.setItem('misija_admin_game',JSON.stringify(game))}
 function loadResults(){try{return JSON.parse(localStorage.getItem('misija_admin_results')||'[]')}catch(e){return[]}}
