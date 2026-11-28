@@ -197,6 +197,7 @@ video{width:100%;max-width:480px;border-radius:14px;background:#000;aspect-ratio
 <script src="qrcode.js"></script>
 <script src="common.js"></script>
 <script src="ops.js"></script>
+<script src="tasks.js"></script>
 <script src="game.js"></script>
 <script>
 const $=id=>document.getElementById(id);
@@ -252,7 +253,7 @@ function renderResults(){
       const pts=partnersOf(r), hi=pts.some(x=>x.p.hi);
       const badge=pts.length?`<span class="badge${hi?' hi':''}" title="Kopā ar: ${M.esc(pts.map(x=>x.o.n+' ('+x.p.shared.length+' KP)').join(', '))}">👥 ${pts.length}</span>`:'';
       const op=r.o&&opById(r.o);
-      return `<tr><td>${i+1}</td><td><div style="display:flex;gap:8px;align-items:flex-start">${op?`<span title="${op.name} · ${op.role}" style="flex:none">${avatarSvg(op.k,34)}</span>`:''}<div><b>${M.esc(r.n)}</b>${badge}${op?`<div class="small" style="color:${op.c}">${op.name} · ${op.role}${r.u&&r.u.length?` · ⚡${r.u.length}×`:''}${r.x?` · +${r.x} min`:''}</div>`:''}${pts.length?`<div class="with">kopā ar: ${pts.map(x=>M.esc(x.o.n)).join(', ')}</div>`:''}<div class="mut small">${M.clock(r.s)}–${M.clock(r.f)}</div></div></div></td>
+      return `<tr><td>${i+1}</td><td><div style="display:flex;gap:8px;align-items:flex-start">${op?`<span title="${op.name} · ${op.role}" style="flex:none">${avatarSvg(op.k,34)}</span>`:''}<div><b>${M.esc(r.n)}</b>${badge}${op?`<div class="small" style="color:${op.c}">${op.name} · ${op.role}${r.u&&r.u.length?` · ⚡${r.u.length}×`:''}${r.k?` · ✎${Object.values(r.k).filter(Boolean).length}/${Object.keys(r.k).length}`:''}${r.x?` · +${r.x} min`:''}</div>`:''}${pts.length?`<div class="with">kopā ar: ${pts.map(x=>M.esc(x.o.n)).join(', ')}</div>`:''}<div class="mut small">${M.clock(r.s)}–${M.clock(r.f)}</div></div></div></td>
       <td><b>${sc.total}</b>${sc.penalty||sc.bonus||sc.doubled?`<div class="mut small">${sc.raw}${sc.bonus?'+'+sc.bonus:''}${sc.penalty?'−'+sc.penalty:''}${sc.doubled?` (×2: +${sc.doubled})`:''}</div>`:''}</td><td>${sc.count}</td>
       <td>${sc.nFacts?`<span class="${sc.complete?'ok':''}">${sc.facts.size}/${sc.nFacts}</span>`:'—'}</td><td>${M.fmt(sc.usedMs)}</td>
       <td>${sc.dq?'<span class="bad">DQ</span>':sc.penalty?`−${sc.penalty} (${sc.overMin} min)`:'—'}</td>
@@ -332,7 +333,7 @@ function routeHtml(r){
       <td>${M.clock(r.s+l.t*1000)}</td><td>${M.fmt(l.t*1000)}</td><td><b>${M.fmt(l.split*1000)}</b></td>
       <td class="with">${l.fin?'':withAt(r,l.id)}</td>
       <td><div class="splitbar"><i style="width:${Math.max(2,l.split/maxSplit*100)}%"></i></div></td></tr>`}).join('')+
-    `</table>`+(r.u&&r.u.length?`<div style="margin-top:8px"><b class="small" style="color:#7CFF6B">⚡ Īpašības${r.o&&opById(r.o)?' · '+opById(r.o).name:''}${r.x?` · laiks +${r.x} min`:''}</b>`+r.u.map(u=>`<div class="small"><span class="mut">${M.clock(r.s+u[0]*1000)}</span> <b>${M.esc(u[1])}</b>: ${M.esc(u[2])}</div>`).join('')+`</div>`:'')+`<p class="mut small" style="margin:6px 0 0">📡 = atzīmēts ar GPS, ▦ = QR kods. Posms = laiks no iepriekšējā KP. Garākais posms iekrāsots dzeltens. “Tajā pašā laikā” = citi jaunsargi šajā KP ±${gw.win} min robežās.</p></div>`;
+    `</table>`+(r.k?`<div class="small" style="margin-top:8px"><b style="color:#FFB547">✎ Štāba uzdevumi:</b> `+Object.entries(r.k).map(([id,ok])=>{const t=(window.MISIJA_TASKS||[]).find(x=>x.id===id);return `${M.esc(t?t.q:id)} ${ok?'<span class="ok">✓ pareizi (+1 īpašība)</span>':'<span class="bad">✕ nepareizi</span>'}`}).join(' · ')+`</div>`:'')+(r.u&&r.u.length?`<div style="margin-top:8px"><b class="small" style="color:#7CFF6B">⚡ Īpašības${r.o&&opById(r.o)?' · '+opById(r.o).name:''}${r.x?` · laiks +${r.x} min`:''}</b>`+r.u.map(u=>`<div class="small"><span class="mut">${M.clock(r.s+u[0]*1000)}</span> <b>${M.esc(u[1])}</b>: ${M.esc(u[2])}</div>`).join('')+`</div>`:'')+`<p class="mut small" style="margin:6px 0 0">📡 = atzīmēts ar GPS, ▦ = QR kods. Posms = laiks no iepriekšējā KP. Garākais posms iekrāsots dzeltens. “Tajā pašā laikā” = citi jaunsargi šajā KP ±${gw.win} min robežās.</p></div>`;
 }
 $('resTable').addEventListener('click',e=>{const rb=e.target.closest('.route');if(rb){const k=rb.dataset.k;openRoutes.has(k)?openRoutes.delete(k):openRoutes.add(k);renderResults();return}const b=e.target.closest('.delres');if(!b)return;const id=b.dataset.id;if(!confirm('Dzēst šo rezultātu?'))return;results=results.filter(x=>x.g+'|'+x.n+'|'+x.s!==id);saveResults();renderResults()});
 

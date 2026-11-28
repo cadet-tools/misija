@@ -69,6 +69,7 @@
     if (st.op) body.o = st.op;
     if (st.extra) body.x = st.extra;
     if (st.uses && st.uses.length) body.u = st.uses;
+    if (st.tasks) { const k = {}; for (const id in st.tasks) { const s = st.tasks[id]; if (s.ok || s.fails) k[id] = s.ok ? 1 : 0; } if (Object.keys(k).length) body.k = k; }
     const json = JSON.stringify(body);
     body.h = M.sign(game.key, json);
     return 'MR1.' + M.b64e(enc.encode(JSON.stringify(body)));

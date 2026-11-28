@@ -136,6 +136,9 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 .load .barx i.run{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.18) 0 8px,transparent 8px 16px);background-size:22px 22px;animation:stripes .6s linear infinite}
 @keyframes stripes{to{background-position:22px 0}}
 .load .sub{font:400 11px 'JetBrains Mono',monospace;color:var(--mut);margin-top:6px;letter-spacing:.5px}
+.task{border:2px solid var(--amber);background:#1d1608;padding:16px}
+.task .q{font:700 21px/1.3 'Saira Condensed',sans-serif;color:#FFF3DC;margin:10px 0}
+.badge{display:inline-block;min-width:18px;height:18px;border-radius:9px;background:var(--amber);color:#1a1307;font:700 11px/18px 'JetBrains Mono',monospace;text-align:center;padding:0 4px;margin-left:4px}
 .md{display:inline-block;width:11px;height:11px;border-radius:50%;vertical-align:-1px;margin-right:4px}
 </style>
 </head>
@@ -363,6 +366,23 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
   </div>
 </div>
 
+<!-- ŠTĀBA UZDEVUMS -->
+<div class="ov hidden" id="taskOv">
+  <div class="box">
+    <div class="bar"><span style="color:var(--amber)">● ŠIFRĒTS ZIŅOJUMS NO ŠTĀBA</span><span id="taskNo"></span></div>
+    <div class="task">
+      <div class="st" style="font-size:26px;line-height:1.05;color:var(--amber)">ŠTĀBA UZDEVUMS</div>
+      <div class="mono" style="font-size:12px;color:#E8D3A8;margin-top:6px;letter-spacing:.5px">Atbildi pareizi un saņem <b>+1 īpašības reizi</b>.</div>
+      <div class="q" id="taskQ"></div>
+      <div class="mut small" id="taskHint"></div>
+      <input id="taskA" autocomplete="off" style="margin-top:10px;font-size:22px;text-align:center">
+      <div class="mono small" id="taskMsg" style="margin-top:8px;min-height:18px;text-align:center"></div>
+    </div>
+    <button class="btn cta" id="taskOk" data-sfx="none">ATBILDĒT</button>
+    <button class="btn" id="taskLater">ATLIKT UZ VĒLĀKU</button>
+  </div>
+</div>
+
 <!-- ĪPAŠĪBA -->
 <div class="ov hidden" id="abOv">
   <div class="box">
@@ -374,6 +394,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
       <div id="abDia" style="margin-top:4px"></div>
       <div class="mono" id="abLeft" style="font-size:12px;color:var(--acc);letter-spacing:1px"></div>
     </div>
+    <div id="abTasks"></div>
     <div id="abForm" style="display:flex;flex-direction:column;gap:8px"></div>
     <div class="panel hidden" id="abRes" style="border-color:var(--acc);background:#0c160c"></div>
     <button class="btn cta" id="abUse" data-sfx="none">IZMANTOT</button>
@@ -386,6 +407,7 @@ details>summary{cursor:pointer;list-style:none}details>summary::-webkit-details-
 <script src="qrcode.js"></script>
 <script src="common.js"></script>
 <script src="ops.js"></script>
+<script src="tasks.js"></script>
 <script src="game.js"></script>
 <script src="map.js"></script>
 <script src="sfx.js"></script>
@@ -398,7 +420,11 @@ const stKey=()=> 'misija_state_'+game.id;
 function save(){localStorage.setItem(stKey(),JSON.stringify(st))}
 function load(){try{return JSON.parse(localStorage.getItem(stKey())||'null')}catch(e){return null}}
 const abilOn=()=>!!game.abil;
-const usesMax=()=>game.uses||3;
+const TASKS=()=>(window.MISIJA_TASKS||[]);
+const taskSt=id=>((st&&st.tasks)||{})[id]||{};
+const bonusUses=()=>TASKS().reduce((a,t)=>a+(taskSt(t.id).ok?(t.reward||1):0),0);
+const usesMax=()=>(game.uses||3)+bonusUses();
+const pendingTasks=()=>TASKS().filter(t=>{const s=taskSt(t.id);return !s.ok&&(s.fails||0)<(t.tries||3)});
 const limitMin=()=>game.min+(st&&st.extra||0);
 const factName=id=>((game.facts||[]).find(f=>f.id===id)||{t:id}).t;
 const kpById=id=>game.kp.find(k=>k.id===id);
@@ -537,7 +563,7 @@ function renderArmed(){
   $('armedBox').innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" style="flex:none"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg><span>'+a.join('<br>')+'</span>';
 }
 const usedCount=()=>(st.uses||[]).length;
-function renderAbBtn(){const left=usesMax()-usedCount();$('abPips').textContent='◆'.repeat(Math.max(0,left))+'◇'.repeat(Math.max(0,usesMax()-Math.max(0,left)))}
+function renderAbBtn(){const left=usesMax()-usedCount();$('abPips').innerHTML='◆'.repeat(Math.max(0,left))+'◇'.repeat(Math.max(0,usesMax()-Math.max(0,left)))+(pendingTasks().length?`<span class="badge">${pendingTasks().length}</span>`:'')}
 
 function tickTimer(){
   const total=limitMin()*60000, left=st.start+total-Date.now();
@@ -684,6 +710,8 @@ function openAb(){
   $('abDia').innerHTML=Array.from({length:usesMax()},(_,i)=>`<span class="dia${i<left?' on':''}"></span>`).join('');
   $('abLeft').textContent=`ATLIKUŠAS ${left} NO ${usesMax()} REIZĒM`;
   $('abRes').classList.add('hidden');
+  const pt=pendingTasks();
+  $('abTasks').innerHTML=pt.length?`<div class="task" style="padding:12px"><div class="mono" style="font-size:11px;color:var(--amber);letter-spacing:1.5px">PAPILDINĀT ĪPAŠĪBU · ${pt.length} UZDEVUM${pt.length===1?'S':'I'}</div><div style="font-size:15px;color:#FFF3DC;margin:4px 0 8px">Izpildi štāba uzdevumu un saņem +1 reizi.</div>${pt.map(t=>`<button class="btn" data-task="${t.id}" style="border-color:var(--amber);color:var(--amber);min-height:44px;margin-top:6px">PAPILDINĀT: ${M.esc(t.q.length>34?t.q.slice(0,34)+'…':t.q)}</button>`).join('')}</div>`:'';
   const f=$('abForm'); f.innerHTML='';
   let ready=left>0, note='';
   if(o.k==='vanags')f.innerHTML=`<label><span class="lbl">Kuru KP izlūkot?</span><select id="abA">${kpOptions(true)}</select></label>`;
@@ -708,6 +736,7 @@ function openAb(){
   $('abOv').classList.remove('hidden');
 }
 $('abBtn').onclick=()=>{openAb();SFX.play('soft')};
+$('abTasks').addEventListener('click',e=>{const b=e.target.closest('[data-task]');if(!b)return;$('abOv').classList.add('hidden');openTask(b.dataset.task)});
 $('abClose').onclick=()=>{$('abOv').classList.add('hidden');render()};
 $('abUse').onclick=()=>{
   const o=opById(st.op); if(!o||usedCount()>=usesMax())return;
@@ -747,6 +776,51 @@ $('abUse').onclick=()=>{
   $('abUse').disabled=true; $('abUse').textContent=left>0?'IZMANTOTS ✓':'ĪPAŠĪBA IZLIETOTA';
   $('abForm').innerHTML='';
 };
+
+/* ---------- ŠTĀBA UZDEVUMI ---------- */
+let curTask=null;
+const normAns=s=>String(s||'').toLowerCase().replace(/\s+/g,'');
+function openTask(id){
+  const t=TASKS().find(x=>x.id===id); if(!t)return;
+  curTask=t; st.tasks=st.tasks||{}; st.tasks[id]=Object.assign({},st.tasks[id],{seen:1}); save();
+  const s=taskSt(id), left=(t.tries||3)-(s.fails||0);
+  $('taskNo').textContent=`MĒĢINĀJUMI: ${left}`;
+  $('taskQ').textContent=t.q; $('taskHint').textContent=t.hint||'';
+  $('taskA').value=''; $('taskA').inputMode=t.num?'numeric':'text';
+  $('taskMsg').textContent=''; $('taskOk').disabled=false; $('taskOk').textContent='ATBILDĒT';
+  $('taskLater').textContent='ATLIKT UZ VĒLĀKU';
+  $('taskOv').classList.remove('hidden'); setTimeout(()=>$('taskA').focus(),200);
+}
+$('taskLater').onclick=()=>{$('taskOv').classList.add('hidden');curTask=null;render()};
+$('taskOk').onclick=()=>{
+  const t=curTask; if(!t)return;
+  const a=normAns($('taskA').value);
+  if(!a){$('taskMsg').style.color='var(--amber)';$('taskMsg').textContent='Ieraksti atbildi.';return}
+  if(t.num&&!/^\d+$/.test(a)){$('taskMsg').style.color='var(--amber)';$('taskMsg').textContent='Ieraksti tikai skaitli.';return}
+  const s=Object.assign({},taskSt(t.id));
+  if(M.cyrb53('misija-task|'+t.id+'|'+a).toString(36)===t.h){
+    s.ok=1; s.t=Math.round((Date.now()-st.start)/1000); st.tasks[t.id]=s; save();
+    SFX.play('success'); setTimeout(()=>SFX.play('op_'+(st.op||'vanags')),900); M.buzz([100,50,200]);
+    $('taskMsg').style.color='var(--g)'; $('taskMsg').textContent=`✓ PAREIZI! ĪPAŠĪBA PAPILDINĀTA: +${t.reward||1}`;
+    $('taskOk').disabled=true; $('taskLater').textContent='TURPINĀT MISIJU';
+  }else{
+    s.fails=(s.fails||0)+1; st.tasks[t.id]=s; save(); SFX.play('error'); M.buzz([60,60,60]);
+    const left=(t.tries||3)-s.fails;
+    $('taskNo').textContent=`MĒĢINĀJUMI: ${Math.max(0,left)}`;
+    $('taskMsg').style.color='var(--red)';
+    if(left>0)$('taskMsg').textContent=`✕ Nepareizi. Atlikuši ${left} mēģinājum${left===1?'s':'i'}.`;
+    else{$('taskMsg').textContent='✕ Nepareizi. Mēģinājumi beigušies.';$('taskOk').disabled=true;$('taskLater').textContent='TURPINĀT MISIJU'}
+  }
+  renderAbBtn();
+};
+// Jauns, vēl neredzēts uzdevums uzlec automātiski (tikai misijas laikā, kad nav atvērts cits logs)
+function checkNewTasks(){
+  if(!st||!st.start||st.finish||!st.op)return;
+  if(busyNow())return;
+  const t=pendingTasks().find(x=>!taskSt(x.id).seen);
+  if(t){SFX.play('warn');setTimeout(()=>SFX.say('New task from H Q'),900);openTask(t.id)}
+}
+setInterval(checkNewTasks,3000);
 
 /* ---------- FINIŠS ---------- */
 function renderDone(){
